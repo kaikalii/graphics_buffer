@@ -1,0 +1,8 @@
+[package]
+name = "graphics_buffer"
+version = "0.1.0"
+authors = ["Kai Schmidt <kaikaliischmidt@gmail.com>"]
+
+[dependencies]
+piston2d-graphics = "*"
+image = "*"
