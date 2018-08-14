@@ -1,6 +1,10 @@
 extern crate bit_vec;
 extern crate graphics;
 extern crate image;
+extern crate rusttype;
+
+mod glyphs;
+pub use glyphs::*;
 
 use std::{ops, path::Path};
 

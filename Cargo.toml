@@ -11,6 +11,7 @@ examples = ["find_folder"]
 piston2d-graphics = "*"
 image = "*"
 bit-vec = "*"
+rusttype = "*"
 find_folder = { version = "*", optional = true }
 
 [[example]]
