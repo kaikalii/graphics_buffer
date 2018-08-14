@@ -1,3 +1,5 @@
+//! This library provides a buffer which can be used as a render target for [Piston's graphics library](https://github.com/PistonDevelopers/graphics). This buffer can be loaded from and/or saved to a file on disk. This allows for things like screenshots in games.
+
 extern crate bit_vec;
 extern crate graphics;
 extern crate image;
