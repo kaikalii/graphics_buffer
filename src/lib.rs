@@ -26,6 +26,10 @@ fn color_rgba_f32(color: &Rgba<u8>) -> [f32; 4] {
     ]
 }
 
+fn color_mul(a: &[f32; 4], b: &[f32; 4]) -> [f32; 4] {
+    [a[0] * b[0], a[1] * b[1], a[2] * b[2], a[3] * b[3]]
+}
+
 fn sign(p1: [f32; 2], p2: [f32; 2], p3: [f32; 2]) -> f32 {
     (p1[0] - p3[0]) * (p2[1] - p3[1]) - (p2[0] - p3[0]) * (p1[1] - p3[1])
 }
@@ -151,7 +155,7 @@ impl Graphics for RenderBuffer {
     fn tri_list_uv<F>(
         &mut self,
         _draw_state: &DrawState,
-        _color: &[f32; 4],
+        color: &[f32; 4],
         texture: &Self::Texture,
         mut f: F,
     ) where
@@ -182,7 +186,11 @@ impl Graphics for RenderBuffer {
                                 mapped_point[0].round() as u32,
                                 mapped_point[1].round() as u32,
                             );
-                            self.inner.put_pixel(x, y, *texel);
+                            self.inner.put_pixel(
+                                x,
+                                y,
+                                color_f32_rgba(&color_mul(&color_rgba_f32(texel), color)),
+                            );
                         }
                     }
                 }
