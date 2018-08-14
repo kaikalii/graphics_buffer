@@ -3,7 +3,7 @@ extern crate image;
 
 use std::ops;
 
-use graphics::{draw_state::DrawState, types::Color, Graphics, ImageSize};
+use graphics::{draw_state::DrawState, math::Matrix2d, types::Color, Graphics, ImageSize};
 use image::{DynamicImage, Rgba, RgbaImage};
 
 fn color_f32_rgba(color: &[f32; 4]) -> Rgba<u8> {
@@ -65,6 +65,10 @@ fn tri_image_scale(tri: &[[f32; 2]], size: (u32, u32)) -> [[f32; 2]; 3] {
         point_image_scale(tri[1], size),
         point_image_scale(tri[2], size),
     ]
+}
+
+pub fn identity() -> Matrix2d {
+    [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
 }
 
 #[derive(Debug, Clone)]
