@@ -205,7 +205,7 @@ fn layer_color(over: &[f32; 4], under: &[f32; 4]) -> [f32; 4] {
         over_weight * over[0] + under_weight * under[0],
         over_weight * over[1] + under_weight * under[1],
         over_weight * over[2] + under_weight * under[2],
-        1.0,
+        over[3].max(under[3]),
     ]
 }
 
