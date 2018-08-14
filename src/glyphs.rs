@@ -24,18 +24,21 @@ impl CharacterDef {
     }
 }
 
+/// A character cache for drawing text to a `RenderBuffer`
 pub struct BufferGlyphs<'f> {
     characters: HashMap<(char, u32), CharacterDef>,
     font: Font<'f>,
 }
 
 impl<'f> BufferGlyphs<'f> {
+    /// Loads a `BufferGlyphs` from an array of font data
     pub fn from_bytes(bytes: &'f [u8]) -> Result<BufferGlyphs<'f>, Error> {
         Ok(BufferGlyphs {
             characters: HashMap::new(),
             font: Font::from_bytes(bytes)?,
         })
     }
+    /// Loads a `BufferGlyphs` from a `Font`
     pub fn from_font(font: Font<'f>) -> BufferGlyphs<'f> {
         BufferGlyphs {
             characters: HashMap::new(),
