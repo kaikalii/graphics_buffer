@@ -10,7 +10,7 @@ categories = ["multimedia", "multimedia::images", "rendering"]
 license = "MIT"
 
 [dependencies]
-piston2d-graphics = "*"
-image = "*"
-bit-vec = "*"
-rusttype = "*"
+piston2d-graphics = "0.26.0"
+image = "0.19.0"
+bit-vec = "0.5.0"
+rusttype = "0.6.3"
