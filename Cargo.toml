@@ -20,3 +20,7 @@ name = "circles"
 [[example]]
 name = "tiled"
 required-features = ["examples"]
+
+[[example]]
+name = "text"
+required-features = ["examples"]

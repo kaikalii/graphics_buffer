@@ -4,7 +4,7 @@ use graphics::{
     character::{Character, CharacterCache},
     types::{FontSize, Scalar},
 };
-use rusttype::{point, Font, GlyphId, Rect, Scale};
+use rusttype::{self, point, Error, Font, GlyphId, Rect, Scale};
 
 use super::*;
 
@@ -30,7 +30,13 @@ pub struct BufferGlyphs<'f> {
 }
 
 impl<'f> BufferGlyphs<'f> {
-    pub fn new(font: Font<'f>) -> BufferGlyphs<'f> {
+    pub fn from_bytes(bytes: &'f [u8]) -> Result<BufferGlyphs<'f>, Error> {
+        Ok(BufferGlyphs {
+            characters: HashMap::new(),
+            font: Font::from_bytes(bytes)?,
+        })
+    }
+    pub fn from_font(font: Font<'f>) -> BufferGlyphs<'f> {
         BufferGlyphs {
             characters: HashMap::new(),
             font,
@@ -86,8 +92,16 @@ impl<'f> CharacterCache for BufferGlyphs<'f> {
             .as_character())
     }
     fn width(&mut self, size: FontSize, text: &str) -> Result<Scalar, Self::Error> {
-        Ok(text
-            .chars()
-            .fold(0.0, |sum, c| sum + self.character(size, c).unwrap().width()))
+        text.chars().fold(Ok(0.0), |sum, c| {
+            if let Ok(s) = sum {
+                if let Ok(ch) = self.character(size, c) {
+                    Ok(s + ch.width())
+                } else {
+                    sum
+                }
+            } else {
+                sum
+            }
+        })
     }
 }
