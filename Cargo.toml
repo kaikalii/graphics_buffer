@@ -3,6 +3,18 @@ name = "graphics_buffer"
 version = "0.1.0"
 authors = ["Kai Schmidt <kaikaliischmidt@gmail.com>"]
 
+[features]
+default = ["examples"]
+examples = ["find_folder"]
+
 [dependencies]
 piston2d-graphics = "*"
 image = "*"
+find_folder = { version = "*", optional = true }
+
+[[example]]
+name = "circle"
+
+[[example]]
+name = "tile"
+required-features = ["examples"]
