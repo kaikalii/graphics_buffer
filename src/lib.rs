@@ -67,26 +67,35 @@ fn tri_image_scale(tri: &[[f32; 2]], size: (u32, u32)) -> [[f32; 2]; 3] {
     ]
 }
 
+/// Returns the identity matrix: `[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]`.
 pub fn identity() -> Matrix2d {
     [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
 }
 
+/// A buffer that can be rendered to with Piston's graphics library.
 #[derive(Debug, Clone)]
 pub struct RenderBuffer {
     inner: RgbaImage,
 }
 
 impl RenderBuffer {
+    /// Create a new `RenderBuffer` with the given witdth or height.
     pub fn new(width: u32, height: u32) -> RenderBuffer {
         RenderBuffer {
             inner: RgbaImage::new(width, height),
         }
     }
+    /// Clear the buffer with a color.
     pub fn clear(&mut self, color: [f32; 4]) {
         self.clear_color(color);
     }
+    /// Returns the color of the pixel at the given coordinates
     pub fn pixel(&self, x: u32, y: u32) -> [f32; 4] {
         color_rgba_f32(self.inner.get_pixel(x, y))
+    }
+    /// Sets the color of the pixel at the given coordinates
+    pub fn set_pixel(&mut self, x: u32, y: u32, color: [f32; 4]) {
+        self.inner.put_pixel(x, y, color_f32_rgba(&color));
     }
 }
 
