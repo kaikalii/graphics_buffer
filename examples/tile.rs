@@ -7,6 +7,7 @@ use graphics::{Image, Transformed};
 use graphics_buffer::*;
 
 fn main() {
+    // Load Matt Damon
     let matt = RenderBuffer::from(
         image::open(
             find_folder::Search::ParentsThenKids(3, 3)
@@ -14,15 +15,17 @@ fn main() {
                 .unwrap(),
         ).unwrap(),
     );
+
     let mut buffer = RenderBuffer::new(matt.width() * 2, matt.height() * 2);
     buffer.clear([0.0, 0.0, 0.0, 1.0]);
+
     for (color, (x, y)) in &[
-        ([1.0, 0.2, 0.2, 1.0], (0.0, 0.0)),
-        ([1.0, 1.0, 0.0, 1.0], (matt.width() as f64, 0.0)),
-        ([0.0, 1.0, 0.0, 1.0], (0.0, matt.height() as f64)),
+        ([1.0, 0.2, 0.2, 1.0], (0.0, 0.0)), // red, top left
+        ([1.0, 1.0, 0.0, 1.0], (matt.width() as f64, 0.0)), // yellow, top right
+        ([0.0, 1.0, 0.0, 1.0], (0.0, matt.height() as f64)), // green, bottom left
         (
-            [0.2, 0.2, 1.0, 1.0],
-            (matt.width() as f64, matt.height() as f64),
+            [0.2, 0.2, 1.0, 1.0],                        // blue
+            (matt.width() as f64, matt.height() as f64), // bottom right
         ),
     ] {
         Image::new_color(*color).draw(
@@ -32,5 +35,7 @@ fn main() {
             &mut buffer,
         );
     }
+
+    // Save the image
     buffer.save("tiled.png").unwrap();
 }
