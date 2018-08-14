@@ -6,67 +6,6 @@ use std::{ops, path::Path};
 use graphics::{draw_state::DrawState, math::Matrix2d, types::Color, Graphics, ImageSize};
 use image::{DynamicImage, ImageError, Rgba, RgbaImage};
 
-fn color_f32_rgba(color: &[f32; 4]) -> Rgba<u8> {
-    Rgba {
-        data: [
-            (color[0] * 255.0) as u8,
-            (color[1] * 255.0) as u8,
-            (color[2] * 255.0) as u8,
-            (color[3] * 255.0) as u8,
-        ],
-    }
-}
-
-fn color_rgba_f32(color: &Rgba<u8>) -> [f32; 4] {
-    [
-        (color.data[0] as f32) / 255.0,
-        (color.data[1] as f32) / 255.0,
-        (color.data[2] as f32) / 255.0,
-        (color.data[3] as f32) / 255.0,
-    ]
-}
-
-fn color_mul(a: &[f32; 4], b: &[f32; 4]) -> [f32; 4] {
-    [a[0] * b[0], a[1] * b[1], a[2] * b[2], a[3] * b[3]]
-}
-
-fn sign(p1: [f32; 2], p2: [f32; 2], p3: [f32; 2]) -> f32 {
-    (p1[0] - p3[0]) * (p2[1] - p3[1]) - (p2[0] - p3[0]) * (p1[1] - p3[1])
-}
-
-fn triangle_contains(tri: &[[f32; 2]], point: [f32; 2]) -> bool {
-    let b1 = sign(point, tri[0], tri[1]) < 0.0;
-    let b2 = sign(point, tri[1], tri[2]) < 0.0;
-    let b3 = sign(point, tri[2], tri[0]) < 0.0;
-    b1 == b2 && b2 == b3
-}
-
-fn map_to_triangle(point: [f32; 2], from_tri: &[[f32; 2]], to_tri: &[[f32; 2]]) -> [f32; 2] {
-    let t = from_tri;
-    let p = point;
-    let bary_a = ((t[1][1] - t[2][1]) * (p[0] - t[2][0]) + (t[2][0] - t[1][0]) * (p[1] - t[2][1]))
-        / ((t[1][1] - t[2][1]) * (t[0][0] - t[2][0]) + (t[2][0] - t[1][0]) * (t[0][1] - t[2][1]));
-    let bary_b = ((t[2][1] - t[0][1]) * (p[0] - t[2][0]) + (t[0][0] - t[2][0]) * (p[1] - t[2][1]))
-        / ((t[1][1] - t[2][1]) * (t[0][0] - t[2][0]) + (t[2][0] - t[1][0]) * (t[0][1] - t[2][1]));
-    let bary_c = 1.0 - bary_a - bary_b;
-    [
-        bary_a * to_tri[0][0] + bary_b * to_tri[1][0] + bary_c * to_tri[2][0],
-        bary_a * to_tri[0][1] + bary_b * to_tri[1][1] + bary_c * to_tri[2][1],
-    ]
-}
-
-fn point_image_scale(point: [f32; 2], size: (u32, u32)) -> [f32; 2] {
-    [point[0] * size.0 as f32, point[1] * size.1 as f32]
-}
-
-fn tri_image_scale(tri: &[[f32; 2]], size: (u32, u32)) -> [[f32; 2]; 3] {
-    [
-        point_image_scale(tri[0], size),
-        point_image_scale(tri[1], size),
-        point_image_scale(tri[2], size),
-    ]
-}
-
 /// Returns the identity matrix: `[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]`.
 pub fn identity() -> Matrix2d {
     [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
@@ -214,4 +153,65 @@ impl Graphics for RenderBuffer {
             }
         });
     }
+}
+
+fn color_f32_rgba(color: &[f32; 4]) -> Rgba<u8> {
+    Rgba {
+        data: [
+            (color[0] * 255.0) as u8,
+            (color[1] * 255.0) as u8,
+            (color[2] * 255.0) as u8,
+            (color[3] * 255.0) as u8,
+        ],
+    }
+}
+
+fn color_rgba_f32(color: &Rgba<u8>) -> [f32; 4] {
+    [
+        (color.data[0] as f32) / 255.0,
+        (color.data[1] as f32) / 255.0,
+        (color.data[2] as f32) / 255.0,
+        (color.data[3] as f32) / 255.0,
+    ]
+}
+
+fn color_mul(a: &[f32; 4], b: &[f32; 4]) -> [f32; 4] {
+    [a[0] * b[0], a[1] * b[1], a[2] * b[2], a[3] * b[3]]
+}
+
+fn sign(p1: [f32; 2], p2: [f32; 2], p3: [f32; 2]) -> f32 {
+    (p1[0] - p3[0]) * (p2[1] - p3[1]) - (p2[0] - p3[0]) * (p1[1] - p3[1])
+}
+
+fn triangle_contains(tri: &[[f32; 2]], point: [f32; 2]) -> bool {
+    let b1 = sign(point, tri[0], tri[1]) < 0.0;
+    let b2 = sign(point, tri[1], tri[2]) < 0.0;
+    let b3 = sign(point, tri[2], tri[0]) < 0.0;
+    b1 == b2 && b2 == b3
+}
+
+fn map_to_triangle(point: [f32; 2], from_tri: &[[f32; 2]], to_tri: &[[f32; 2]]) -> [f32; 2] {
+    let t = from_tri;
+    let p = point;
+    let bary_a = ((t[1][1] - t[2][1]) * (p[0] - t[2][0]) + (t[2][0] - t[1][0]) * (p[1] - t[2][1]))
+        / ((t[1][1] - t[2][1]) * (t[0][0] - t[2][0]) + (t[2][0] - t[1][0]) * (t[0][1] - t[2][1]));
+    let bary_b = ((t[2][1] - t[0][1]) * (p[0] - t[2][0]) + (t[0][0] - t[2][0]) * (p[1] - t[2][1]))
+        / ((t[1][1] - t[2][1]) * (t[0][0] - t[2][0]) + (t[2][0] - t[1][0]) * (t[0][1] - t[2][1]));
+    let bary_c = 1.0 - bary_a - bary_b;
+    [
+        bary_a * to_tri[0][0] + bary_b * to_tri[1][0] + bary_c * to_tri[2][0],
+        bary_a * to_tri[0][1] + bary_b * to_tri[1][1] + bary_c * to_tri[2][1],
+    ]
+}
+
+fn point_image_scale(point: [f32; 2], size: (u32, u32)) -> [f32; 2] {
+    [point[0] * size.0 as f32, point[1] * size.1 as f32]
+}
+
+fn tri_image_scale(tri: &[[f32; 2]], size: (u32, u32)) -> [[f32; 2]; 3] {
+    [
+        point_image_scale(tri[0], size),
+        point_image_scale(tri[1], size),
+        point_image_scale(tri[2], size),
+    ]
 }
