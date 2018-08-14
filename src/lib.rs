@@ -1,10 +1,10 @@
 extern crate graphics;
 extern crate image;
 
-use std::ops;
+use std::{ops, path::Path};
 
 use graphics::{draw_state::DrawState, math::Matrix2d, types::Color, Graphics, ImageSize};
-use image::{DynamicImage, Rgba, RgbaImage};
+use image::{DynamicImage, ImageError, Rgba, RgbaImage};
 
 fn color_f32_rgba(color: &[f32; 4]) -> Rgba<u8> {
     Rgba {
@@ -84,6 +84,10 @@ impl RenderBuffer {
         RenderBuffer {
             inner: RgbaImage::new(width, height),
         }
+    }
+    /// Creates a new `RenderBuffer` by opening it from a file.
+    pub fn open<P: AsRef<Path>>(path: P) -> Result<RenderBuffer, ImageError> {
+        image::open(path).map(|di| RenderBuffer::from(di))
     }
     /// Clear the buffer with a color.
     pub fn clear(&mut self, color: [f32; 4]) {

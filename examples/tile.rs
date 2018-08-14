@@ -1,24 +1,23 @@
 extern crate find_folder;
 extern crate graphics;
 extern crate graphics_buffer;
-extern crate image;
 
 use graphics::{Image, Transformed};
 use graphics_buffer::*;
 
 fn main() {
     // Load Matt Damon
-    let matt = RenderBuffer::from(
-        image::open(
-            find_folder::Search::ParentsThenKids(3, 3)
-                .for_folder("matt.jpg")
-                .unwrap(),
-        ).unwrap(),
-    );
+    let matt = RenderBuffer::open(
+        find_folder::Search::ParentsThenKids(3, 3)
+            .for_folder("matt.jpg")
+            .unwrap(),
+    ).unwrap();
 
+    // Initalize the buffer
     let mut buffer = RenderBuffer::new(matt.width() * 2, matt.height() * 2);
     buffer.clear([0.0, 0.0, 0.0, 1.0]);
 
+    // Tile the image with different colors
     for (color, (x, y)) in &[
         ([1.0, 0.2, 0.2, 1.0], (0.0, 0.0)), // red, top left
         ([1.0, 1.0, 0.0, 1.0], (matt.width() as f64, 0.0)), // yellow, top right
