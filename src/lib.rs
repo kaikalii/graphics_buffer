@@ -1,18 +1,26 @@
 //! This library provides a buffer which can be used as a render target for [Piston's graphics library](https://github.com/PistonDevelopers/graphics). This buffer can be loaded from and/or saved to a file on disk. This allows for things like screenshots in games.
 
+// !There is also an optional feature for `RenderBuffer` that allows it to be converted into a `G2dTexture` so that it can be rendered with [`piston_window`](https://github.com/PistonDevelopers/piston_window). To enable this, add `features = ["piston_window_texture"]` to the `graphics_buffer` dependency in your `cargo.toml`.
+
 extern crate bit_vec;
 extern crate graphics;
 extern crate image;
+#[cfg(feature = "piston_window_texture")]
+extern crate piston_window;
 extern crate rusttype;
 
 mod glyphs;
 pub use glyphs::*;
 
+#[cfg(feature = "piston_window_texture")]
+use std::error::Error;
 use std::{ops, path::Path};
 
 use bit_vec::BitVec;
 use graphics::{draw_state::DrawState, math::Matrix2d, types::Color, Graphics, ImageSize};
 use image::{DynamicImage, GenericImage, ImageResult, Rgba, RgbaImage};
+#[cfg(feature = "piston_window_texture")]
+use piston_window::{G2dTexture, GfxFactory, TextureSettings};
 
 /// Returns the identity matrix: `[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]`.
 pub fn identity() -> Matrix2d {
@@ -45,17 +53,26 @@ impl RenderBuffer {
     pub fn clear(&mut self, color: [f32; 4]) {
         self.clear_color(color);
     }
-    /// Returns the color of the pixel at the given coordinates
+    /// Returns the color of the pixel at the given coordinates.
     pub fn pixel(&self, x: u32, y: u32) -> [f32; 4] {
         color_rgba_f32(self.inner.get_pixel(x, y))
     }
-    /// Sets the color of the pixel at the given coordinates
+    /// Sets the color of the pixel at the given coordinates.
     pub fn set_pixel(&mut self, x: u32, y: u32, color: [f32; 4]) {
         self.inner.put_pixel(x, y, color_f32_rgba(&color));
     }
     fn reset_used(&mut self) {
         let (width, height) = self.inner.dimensions();
         self.used = vec![BitVec::from_elem(height as usize, false); width as usize];
+    }
+    /// Creates a `G2dTexture` from the `RenderBuffer` for drawing to a `PistonWindow`.
+    #[cfg(feature = "piston_window_texture")]
+    pub fn to_g2d_texture(
+        &self,
+        factory: &mut GfxFactory,
+        settings: &TextureSettings,
+    ) -> Result<G2dTexture, Box<Error>> {
+        Ok(G2dTexture::from_image(factory, &self.inner, settings)?)
     }
 }
 

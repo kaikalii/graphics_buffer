@@ -1,6 +1,6 @@
 [package]
 name = "graphics_buffer"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Kai Schmidt <kaikaliischmidt@gmail.com>"]
 description = "A buffer which can be used as a render target for Piston's graphics library. This buffer can be loaded from and/or saved to a file on disk. This allows for things like screenshots in games."
 repository = "https://github.com/kaikalii/graphics_buffer"
@@ -8,10 +8,27 @@ readme = "readme.md"
 keywords = ["piston", "image", "rendering", "graphics"]
 categories = ["multimedia", "multimedia::images", "rendering"]
 license = "MIT"
-documentation = "https://docs.rs/graphics_buffer/0.1.0/graphics_buffer/"
+documentation = "https://docs.rs/graphics_buffer/0.2.0/graphics_buffer/"
+
+[features]
+piston_window_texture = ["piston_window"]
 
 [dependencies]
 piston2d-graphics = "0.26.0"
 image = "0.19.0"
 bit-vec = "0.5.0"
 rusttype = "0.6.3"
+piston_window = { version = "0.80.0", optional = true }
+
+[[example]]
+name = "circles"
+
+[[example]]
+name = "text"
+
+[[example]]
+name = "tiled"
+
+[[example]]
+name = "window"
+required-features = ["piston_window_texture"]
