@@ -162,8 +162,8 @@ impl Graphics for RenderBuffer {
                             let mapped_point =
                                 map_to_triangle([x as f32, y as f32], tri, &scaled_tex_tri);
                             let texel = color_rgba_f32(texture.get_pixel(
-                                mapped_point[0].round() as u32,
-                                mapped_point[1].round() as u32,
+                                (mapped_point[0].round() as u32).min(texture.width() - 1),
+                                (mapped_point[1].round() as u32).min(texture.height() - 1),
                             ));
                             let over_color = color_mul(color, &texel);
                             let under_color = color_rgba_f32(self.get_pixel(x, y));

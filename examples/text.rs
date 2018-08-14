@@ -2,39 +2,37 @@ extern crate find_folder;
 extern crate graphics;
 extern crate graphics_buffer;
 
-use graphics::{Image, Transformed};
+use std::{fs::File, io::Read};
+
+use graphics::{text, Transformed};
 use graphics_buffer::*;
 
 fn main() {
-    // Load Matt Damon
-    let matt = RenderBuffer::open(
-        find_folder::Search::ParentsThenKids(3, 3)
-            .for_folder("matt.jpg")
-            .unwrap(),
-    ).unwrap();
-
     // Initalize the buffer
-    let mut buffer = RenderBuffer::new(matt.width() * 2, matt.height() * 2);
+    let mut buffer = RenderBuffer::new(100, 40);
     buffer.clear([0.0, 0.0, 0.0, 1.0]);
 
-    // Tile the image with different colors
-    for (color, (x, y)) in &[
-        ([1.0, 0.2, 0.2, 1.0], (0.0, 0.0)), // red, top left
-        ([1.0, 1.0, 0.0, 1.0], (matt.width() as f64, 0.0)), // yellow, top right
-        ([0.0, 1.0, 0.0, 1.0], (0.0, matt.height() as f64)), // green, bottom left
-        (
-            [0.2, 0.2, 1.0, 1.0],                        // blue
-            (matt.width() as f64, matt.height() as f64), // bottom right
-        ),
-    ] {
-        Image::new_color(*color).draw(
-            &matt,
-            &Default::default(),
-            identity().trans(*x, *y),
-            &mut buffer,
-        );
-    }
+    // Load the font and initialize glyphs
+    let mut font_data = Vec::new();
+    let font_path = find_folder::Search::ParentsThenKids(3, 3)
+        .for_folder("roboto.ttf")
+        .unwrap();
+    File::open(font_path)
+        .unwrap()
+        .read_to_end(&mut font_data)
+        .unwrap();
+    let mut glyphs = BufferGlyphs::from_bytes(&font_data).unwrap();
+
+    // Draw text
+    text(
+        [1.0, 1.0, 1.0, 1.0],
+        30,
+        "Oh boy!",
+        &mut glyphs,
+        identity().trans(10.0, 30.0),
+        &mut buffer,
+    ).unwrap();
 
     // Save the image
-    buffer.save("tiled.png").unwrap();
+    buffer.save("text.png").unwrap();
 }

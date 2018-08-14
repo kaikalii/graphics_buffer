@@ -4,7 +4,7 @@ use graphics::{
     character::{Character, CharacterCache},
     types::{FontSize, Scalar},
 };
-use rusttype::{self, point, Error, Font, GlyphId, Rect, Scale};
+use rusttype::{point, Error, Font, GlyphId, Rect, Scale};
 
 use super::*;
 
