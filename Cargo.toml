@@ -10,11 +10,12 @@ examples = ["find_folder"]
 [dependencies]
 piston2d-graphics = "*"
 image = "*"
+bit-vec = "*"
 find_folder = { version = "*", optional = true }
 
 [[example]]
-name = "circle"
+name = "circles"
 
 [[example]]
-name = "tile"
+name = "tiled"
 required-features = ["examples"]

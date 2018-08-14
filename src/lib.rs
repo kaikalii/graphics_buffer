@@ -1,10 +1,12 @@
+extern crate bit_vec;
 extern crate graphics;
 extern crate image;
 
 use std::{ops, path::Path};
 
+use bit_vec::BitVec;
 use graphics::{draw_state::DrawState, math::Matrix2d, types::Color, Graphics, ImageSize};
-use image::{DynamicImage, ImageError, Rgba, RgbaImage};
+use image::{DynamicImage, GenericImage, ImageError, Rgba, RgbaImage};
 
 /// Returns the identity matrix: `[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]`.
 pub fn identity() -> Matrix2d {
@@ -15,6 +17,7 @@ pub fn identity() -> Matrix2d {
 #[derive(Debug, Clone)]
 pub struct RenderBuffer {
     inner: RgbaImage,
+    used: Vec<BitVec>,
 }
 
 impl RenderBuffer {
@@ -22,6 +25,7 @@ impl RenderBuffer {
     pub fn new(width: u32, height: u32) -> RenderBuffer {
         RenderBuffer {
             inner: RgbaImage::new(width, height),
+            used: vec![BitVec::from_elem(height as usize, false); width as usize],
         }
     }
     /// Creates a new `RenderBuffer` by opening it from a file.
@@ -40,18 +44,28 @@ impl RenderBuffer {
     pub fn set_pixel(&mut self, x: u32, y: u32, color: [f32; 4]) {
         self.inner.put_pixel(x, y, color_f32_rgba(&color));
     }
+    fn reset_used(&mut self) {
+        let (width, height) = self.inner.dimensions();
+        self.used = vec![BitVec::from_elem(height as usize, false); width as usize];
+    }
 }
 
 impl From<RgbaImage> for RenderBuffer {
     fn from(image: RgbaImage) -> Self {
-        RenderBuffer { inner: image }
+        let (width, height) = image.dimensions();
+        RenderBuffer {
+            inner: image,
+            used: vec![BitVec::from_elem(height as usize, false); width as usize],
+        }
     }
 }
 
 impl From<DynamicImage> for RenderBuffer {
     fn from(image: DynamicImage) -> Self {
+        let (width, height) = image.dimensions();
         RenderBuffer {
             inner: image.to_rgba(),
+            used: vec![BitVec::from_elem(height as usize, false); width as usize],
         }
     }
 }
@@ -81,8 +95,7 @@ impl Graphics for RenderBuffer {
     where
         F: FnMut(&mut FnMut(&[[f32; 2]])),
     {
-        // Convert color
-        let color = color_f32_rgba(color);
+        self.reset_used();
         // Render Triangles
         f(&mut |vertices| {
             for tri in vertices.chunks(3) {
@@ -100,8 +113,13 @@ impl Graphics for RenderBuffer {
                 // Render
                 for x in tl[0]..br[0] {
                     for y in tl[1]..br[1] {
-                        if triangle_contains(tri, [x as f32, y as f32]) {
-                            self.inner.put_pixel(x, y, color);
+                        if triangle_contains(tri, [x as f32, y as f32])
+                            && !self.used[x as usize].get(y as usize).unwrap_or(true)
+                        {
+                            let under_color = color_rgba_f32(self.inner.get_pixel(x, y));
+                            let layered_color = layer_color(&color, &under_color);
+                            self.inner.put_pixel(x, y, color_f32_rgba(&layered_color));
+                            self.used[x as usize].set(y as usize, true);
                         }
                     }
                 }
@@ -117,6 +135,7 @@ impl Graphics for RenderBuffer {
     ) where
         F: FnMut(&mut FnMut(&[[f32; 2]], &[[f32; 2]])),
     {
+        self.reset_used();
         // Render Triangles
         f(&mut |vertices, tex_vertices| {
             for (tri, tex_tri) in vertices.chunks(3).zip(tex_vertices.chunks(3)) {
@@ -138,15 +157,15 @@ impl Graphics for RenderBuffer {
                         if triangle_contains(tri, [x as f32, y as f32]) {
                             let mapped_point =
                                 map_to_triangle([x as f32, y as f32], tri, &scaled_tex_tri);
-                            let texel = texture.get_pixel(
+                            let texel = color_rgba_f32(texture.get_pixel(
                                 mapped_point[0].round() as u32,
                                 mapped_point[1].round() as u32,
-                            );
-                            self.inner.put_pixel(
-                                x,
-                                y,
-                                color_f32_rgba(&color_mul(&color_rgba_f32(texel), color)),
-                            );
+                            ));
+                            let over_color = color_mul(color, &texel);
+                            let under_color = color_rgba_f32(self.get_pixel(x, y));
+                            let layered_color = layer_color(&over_color, &under_color);
+                            self.inner.put_pixel(x, y, color_f32_rgba(&layered_color));
+                            self.used[x as usize].set(y as usize, true);
                         }
                     }
                 }
@@ -177,6 +196,17 @@ fn color_rgba_f32(color: &Rgba<u8>) -> [f32; 4] {
 
 fn color_mul(a: &[f32; 4], b: &[f32; 4]) -> [f32; 4] {
     [a[0] * b[0], a[1] * b[1], a[2] * b[2], a[3] * b[3]]
+}
+
+fn layer_color(over: &[f32; 4], under: &[f32; 4]) -> [f32; 4] {
+    let over_weight = over[3];
+    let under_weight = 1.0 - over_weight;
+    [
+        over_weight * over[0] + under_weight * under[0],
+        over_weight * over[1] + under_weight * under[1],
+        over_weight * over[2] + under_weight * under[2],
+        1.0,
+    ]
 }
 
 fn sign(p1: [f32; 2], p2: [f32; 2], p3: [f32; 2]) -> f32 {

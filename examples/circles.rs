@@ -10,9 +10,21 @@ fn main() {
     buffer.clear([0.0, 0.0, 0.0, 1.0]);
     ellipse(
         [1.0, 0.0, 0.0, 1.0],
+        [0.0, 0.0, 100.0, 100.0],
+        identity(),
+        &mut buffer,
+    );
+    ellipse(
+        [0.0, 0.0, 1.0, 0.5],
         [0.0, 0.0, 50.0, 50.0],
         identity(),
         &mut buffer,
     );
-    buffer.save("circle.png").unwrap();
+    ellipse(
+        [0.0, 1.0, 0.0, 0.5],
+        [50.0, 50.0, 50.0, 50.0],
+        identity(),
+        &mut buffer,
+    );
+    buffer.save("circles.png").unwrap();
 }
