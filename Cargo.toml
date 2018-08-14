@@ -8,6 +8,7 @@ readme = "readme.md"
 keywords = ["piston", "image", "rendering", "graphics"]
 categories = ["multimedia", "multimedia::images", "rendering"]
 license = "MIT"
+documentation = "https://docs.rs/graphics_buffer/0.1.0/graphics_buffer/"
 
 [dependencies]
 piston2d-graphics = "0.26.0"

@@ -2,6 +2,8 @@
 
 This library provides a buffer type, `RenderBuffer`, which can be used as a render target for [Piston's graphics library](https://github.com/PistonDevelopers/graphics). This buffer can be loaded from and/or saved to a file on disk. This allows for things like screenshots in games.
 
+[API Documentation](https://docs.rs/graphics_buffer/0.1.0/graphics_buffer/)
+
 ### Usage
 
 Add this to your `cargo.toml` :
