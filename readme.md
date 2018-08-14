@@ -7,8 +7,8 @@ This library provides a buffer type, `RenderBuffer`, which can be used as a rend
 Add this to your `cargo.toml` :
 
 ```toml
-graphics_buffer = "*"
-piston2d-graphics = "*"
+graphics_buffer = "0.1.0"
+piston2d-graphics = "0.26.0"
 ```
 
 Here is a simple example that draws three circles and saves the image to a file:
