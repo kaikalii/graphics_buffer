@@ -1,6 +1,5 @@
 extern crate graphics;
 extern crate graphics_buffer;
-extern crate image;
 
 use graphics::ellipse;
 use graphics_buffer::*;
