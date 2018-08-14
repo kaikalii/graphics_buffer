@@ -10,7 +10,7 @@ use std::{ops, path::Path};
 
 use bit_vec::BitVec;
 use graphics::{draw_state::DrawState, math::Matrix2d, types::Color, Graphics, ImageSize};
-use image::{DynamicImage, GenericImage, ImageError, Rgba, RgbaImage};
+use image::{DynamicImage, GenericImage, ImageResult, Rgba, RgbaImage};
 
 /// Returns the identity matrix: `[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]`.
 pub fn identity() -> Matrix2d {
@@ -33,8 +33,11 @@ impl RenderBuffer {
         }
     }
     /// Creates a new `RenderBuffer` by opening it from a file.
-    pub fn open<P: AsRef<Path>>(path: P) -> Result<RenderBuffer, ImageError> {
+    pub fn open<P: AsRef<Path>>(path: P) -> ImageResult<RenderBuffer> {
         image::open(path).map(|di| RenderBuffer::from(di))
+    }
+    pub fn from_bytes(bytes: &[u8]) -> ImageResult<RenderBuffer> {
+        image::load_from_memory(bytes).map(|di| RenderBuffer::from(di))
     }
     /// Clear the buffer with a color.
     pub fn clear(&mut self, color: [f32; 4]) {

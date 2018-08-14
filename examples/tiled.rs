@@ -1,4 +1,3 @@
-extern crate find_folder;
 extern crate graphics;
 extern crate graphics_buffer;
 
@@ -7,11 +6,7 @@ use graphics_buffer::*;
 
 fn main() {
     // Load Matt Damon
-    let matt = RenderBuffer::open(
-        find_folder::Search::ParentsThenKids(3, 3)
-            .for_folder("matt.jpg")
-            .unwrap(),
-    ).unwrap();
+    let matt = RenderBuffer::from_bytes(include_bytes!("matt.jpg")).unwrap();
 
     // Initalize the buffer
     let mut buffer = RenderBuffer::new(matt.width() * 2, matt.height() * 2);
