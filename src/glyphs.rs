@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use failure;
 use graphics::{
     character::{Character, CharacterCache},
     types::{FontSize, Scalar},
@@ -49,7 +50,7 @@ impl<'f> BufferGlyphs<'f> {
 
 impl<'f> CharacterCache for BufferGlyphs<'f> {
     type Texture = RenderBuffer;
-    type Error = ();
+    type Error = failure::Error;
     fn character<'a>(
         &'a mut self,
         font_size: FontSize,

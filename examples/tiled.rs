@@ -6,7 +6,7 @@ use graphics_buffer::*;
 
 fn main() {
     // Load Matt Damon
-    let matt = RenderBuffer::from_bytes(include_bytes!("matt.jpg")).unwrap();
+    let matt = RenderBuffer::decode_from_bytes(include_bytes!("matt.jpg")).unwrap();
 
     // Initalize the buffer
     let mut buffer = RenderBuffer::new(matt.width() * 2, matt.height() * 2);

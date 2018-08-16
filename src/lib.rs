@@ -8,23 +8,48 @@ extern crate image;
 #[cfg(feature = "piston_window_texture")]
 extern crate piston_window;
 extern crate rusttype;
+#[macro_use]
+extern crate failure;
 
 mod glyphs;
 pub use glyphs::*;
 
-#[cfg(feature = "piston_window_texture")]
-use std::error::Error;
-use std::{ops, path::Path};
+use std::{fmt, ops, path::Path};
 
 use bit_vec::BitVec;
 use graphics::{draw_state::DrawState, math::Matrix2d, types::Color, Graphics, ImageSize};
 use image::{DynamicImage, GenericImage, ImageResult, Rgba, RgbaImage};
 #[cfg(feature = "piston_window_texture")]
-use piston_window::{G2dTexture, GfxFactory, TextureSettings};
+use piston_window::{
+    texture::{CreateTexture, Format},
+    G2dTexture, GfxFactory, TextureSettings,
+};
 
 /// Returns the identity matrix: `[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]`.
 pub fn identity() -> Matrix2d {
     [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
+}
+
+/// An Error type for `RenderBuffer`.
+#[derive(Debug, Clone, Fail)]
+pub enum Error {
+    ContainerTooSmall(usize, usize),
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Error::ContainerTooSmall(len, area) => write!(
+                f,
+                "Container is too small for the given dimensions. \
+                 \nContainer has {} bytes, which encode {} pixels, \
+                 \nbut the given demensions contain {} pixels",
+                len,
+                len / 4,
+                area
+            ),
+        }
+    }
 }
 
 /// A buffer that can be rendered to with Piston's graphics library.
@@ -46,7 +71,8 @@ impl RenderBuffer {
     pub fn open<P: AsRef<Path>>(path: P) -> ImageResult<RenderBuffer> {
         image::open(path).map(|di| RenderBuffer::from(di))
     }
-    pub fn from_bytes(bytes: &[u8]) -> ImageResult<RenderBuffer> {
+    /// Creates a new `RenderBuffer` by decoding image data.
+    pub fn decode_from_bytes(bytes: &[u8]) -> ImageResult<RenderBuffer> {
         image::load_from_memory(bytes).map(|di| RenderBuffer::from(di))
     }
     /// Clear the buffer with a color.
@@ -71,8 +97,27 @@ impl RenderBuffer {
         &self,
         factory: &mut GfxFactory,
         settings: &TextureSettings,
-    ) -> Result<G2dTexture, Box<Error>> {
+    ) -> Result<G2dTexture, failure::Error> {
         Ok(G2dTexture::from_image(factory, &self.inner, settings)?)
+    }
+}
+
+#[cfg(feature = "piston_window_texture")]
+impl CreateTexture<()> for RenderBuffer {
+    type Error = failure::Error;
+    fn create<S: Into<[u32; 2]>>(
+        _factory: &mut (),
+        _format: Format,
+        memory: &[u8],
+        size: S,
+        _settings: &TextureSettings,
+    ) -> Result<Self, failure::Error> {
+        let size = size.into();
+        Ok(RenderBuffer::from(
+            RgbaImage::from_raw(size[0], size[1], memory.to_vec()).ok_or(
+                Error::ContainerTooSmall(memory.len(), (size[0] * size[1]) as usize),
+            )?,
+        ))
     }
 }
 
