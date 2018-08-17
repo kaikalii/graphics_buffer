@@ -4,21 +4,21 @@ This library provides a buffer type, `RenderBuffer`, which can be used as a rend
 
 There is also an optional feature for `RenderBuffer` that allows it to be converted into a `G2dTexture` so that it can be rendered with [`piston_window`](https://github.com/PistonDevelopers/piston_window). To enable this, add `features = ["piston_window_texture"]` to the `graphics_buffer` dependency in your `cargo.toml`.
 
-[API Documentation](https://docs.rs/graphics_buffer/0.3.0/graphics_buffer/)
+[API Documentation](https://docs.rs/graphics_buffer/0.3.1/graphics_buffer/)
 
 ### Usage
 
 Add this to your `cargo.toml` :
 
 ```toml
-graphics_buffer = "0.3.0"
+graphics_buffer = "0.3.1"
 piston2d-graphics = "0.26.0"
 ```
 
 or, if you want to be able to draw the texture to a window using [`piston_window`](https://github.com/PistonDevelopers/piston_window) :
 
 ```toml
-graphics_buffer = { version = "0.3.0", features = ["piston_window_texture"] }
+graphics_buffer = { version = "0.3.1", features = ["piston_window_texture"] }
 piston2d-graphics = "0.26.0"
 piston_window = "0.80.0"
 ```
