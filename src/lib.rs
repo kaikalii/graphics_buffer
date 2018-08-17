@@ -179,17 +179,26 @@ impl Graphics for RenderBuffer {
                     br[0] = br[0].max(v[0]);
                     br[1] = br[1].max(v[1]);
                 }
-                let tl = [tl[0].floor() as u32, tl[1].floor() as u32];
-                let br = [br[0].ceil() as u32, br[1].ceil() as u32];
+                let tl = [tl[0].floor() as i32, tl[1].floor() as i32];
+                let br = [br[0].ceil() as i32, br[1].ceil() as i32];
                 // Render
                 for x in tl[0]..br[0] {
                     for y in tl[1]..br[1] {
-                        if triangle_contains(tri, [x as f32, y as f32])
+                        if x >= 0
+                            && x < self.width() as i32
+                            && y >= 0
+                            && y < self.height() as i32
+                            && triangle_contains(tri, [x as f32, y as f32])
                             && !self.used[x as usize].get(y as usize).unwrap_or(true)
                         {
-                            let under_color = color_rgba_f32(self.inner.get_pixel(x, y));
+                            let under_color =
+                                color_rgba_f32(self.inner.get_pixel(x as u32, y as u32));
                             let layered_color = layer_color(&color, &under_color);
-                            self.inner.put_pixel(x, y, color_f32_rgba(&layered_color));
+                            self.inner.put_pixel(
+                                x as u32,
+                                y as u32,
+                                color_f32_rgba(&layered_color),
+                            );
                             self.used[x as usize].set(y as usize, true);
                         }
                     }
@@ -219,13 +228,18 @@ impl Graphics for RenderBuffer {
                     br[0] = br[0].max(v[0]);
                     br[1] = br[1].max(v[1]);
                 }
-                let tl = [tl[0].floor() as u32, tl[1].floor() as u32];
-                let br = [br[0].ceil() as u32, br[1].ceil() as u32];
+                let tl = [tl[0].floor() as i32, tl[1].floor() as i32];
+                let br = [br[0].ceil() as i32, br[1].ceil() as i32];
                 // Render
                 let scaled_tex_tri = tri_image_scale(tex_tri, texture.get_size());
                 for x in tl[0]..br[0] {
                     for y in tl[1]..br[1] {
-                        if triangle_contains(tri, [x as f32, y as f32]) {
+                        if x >= 0
+                            && x < self.width() as i32
+                            && y >= 0
+                            && y < self.height() as i32
+                            && triangle_contains(tri, [x as f32, y as f32])
+                        {
                             let mapped_point =
                                 map_to_triangle([x as f32, y as f32], tri, &scaled_tex_tri);
                             let texel = color_rgba_f32(texture.get_pixel(
@@ -233,9 +247,13 @@ impl Graphics for RenderBuffer {
                                 (mapped_point[1].round() as u32).min(texture.height() - 1),
                             ));
                             let over_color = color_mul(color, &texel);
-                            let under_color = color_rgba_f32(self.get_pixel(x, y));
+                            let under_color = color_rgba_f32(self.get_pixel(x as u32, y as u32));
                             let layered_color = layer_color(&over_color, &under_color);
-                            self.inner.put_pixel(x, y, color_f32_rgba(&layered_color));
+                            self.inner.put_pixel(
+                                x as u32,
+                                y as u32,
+                                color_f32_rgba(&layered_color),
+                            );
                             self.used[x as usize].set(y as usize, true);
                         }
                     }
