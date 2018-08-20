@@ -95,17 +95,4 @@ impl<'f> CharacterCache for BufferGlyphs<'f> {
             })
             .as_character())
     }
-    fn width(&mut self, size: FontSize, text: &str) -> Result<Scalar, Self::Error> {
-        text.chars().fold(Ok(0.0), |sum, c| {
-            if let Ok(s) = sum {
-                if let Ok(ch) = self.character(size, c) {
-                    Ok(s + ch.width())
-                } else {
-                    sum
-                }
-            } else {
-                sum
-            }
-        })
-    }
 }

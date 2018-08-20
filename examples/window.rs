@@ -10,7 +10,7 @@ use piston_window::{
 
 fn main() {
     // Load Matt Damon
-    let matt = RenderBuffer::from_bytes(include_bytes!("matt.jpg")).unwrap();
+    let matt = RenderBuffer::decode_from_bytes(include_bytes!("matt.jpg")).unwrap();
 
     // Load the font and initialize glyphs
     let mut glyphs = BufferGlyphs::from_bytes(include_bytes!("roboto.ttf")).unwrap();
