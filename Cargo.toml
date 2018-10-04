@@ -1,35 +1,47 @@
-[package]
-name = "graphics_buffer"
-version = "0.3.2"
-authors = ["Kai Schmidt <kaikaliischmidt@gmail.com>"]
-description = "A buffer which can be used as a render target for Piston's graphics library. This buffer can be loaded from and/or saved to a file on disk. This allows for things like screenshots in games."
-repository = "https://github.com/kaikalii/graphics_buffer"
-readme = "readme.md"
-keywords = ["piston", "image", "rendering", "graphics"]
-categories = ["multimedia", "multimedia::images", "rendering"]
-license = "MIT"
-documentation = "https://docs.rs/graphics_buffer/0.3.2/graphics_buffer/"
+[[example]]
+name = 'circles'
 
-[features]
-piston_window_texture = ["piston_window"]
+[[example]]
+name = 'text'
+
+[[example]]
+name = 'tiled'
+
+[[example]]
+name = 'window'
+required-features = ['piston_window_texture']
 
 [dependencies]
-piston2d-graphics = "0.26.0"
-image = "0.19.0"
-bit-vec = "0.5.0"
-rusttype = "0.6.3"
-failure = "0.1.2"
-piston_window = { version = "0.80.0", optional = true }
+bit-vec = '0.5.0'
+failure = '0.1.2'
+image = '0.20.0'
+piston2d-graphics = '0.26.0'
+rusttype = '0.7.2'
 
-[[example]]
-name = "circles"
+[dependencies.piston_window]
+optional = true
+version = '0.81.0'
 
-[[example]]
-name = "text"
+[features]
+piston_window_texture = ['piston_window']
 
-[[example]]
-name = "tiled"
-
-[[example]]
-name = "window"
-required-features = ["piston_window_texture"]
+[package]
+authors = ['Kai Schmidt <kaikaliischmidt@gmail.com>']
+categories = [
+    'multimedia',
+    'multimedia::images',
+    'rendering',
+]
+description = '''A buffer which can be used as a render target for Piston's graphics library. This buffer can be loaded from and/or saved to a file on disk. This allows for things like screenshots in games.'''
+documentation = 'https://docs.rs/graphics_buffer/'
+keywords = [
+    'piston',
+    'image',
+    'rendering',
+    'graphics',
+]
+license = 'MIT'
+name = 'graphics_buffer'
+readme = 'readme.md'
+repository = 'https://github.com/kaikalii/graphics_buffer'
+version = '0.3.3'

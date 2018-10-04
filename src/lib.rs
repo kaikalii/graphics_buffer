@@ -18,7 +18,7 @@ use std::{fmt, ops, path::Path};
 
 use bit_vec::BitVec;
 use graphics::{draw_state::DrawState, math::Matrix2d, types::Color, Graphics, ImageSize};
-use image::{DynamicImage, GenericImage, ImageResult, Rgba, RgbaImage};
+use image::{DynamicImage, GenericImageView, ImageResult, Rgba, RgbaImage};
 #[cfg(feature = "piston_window_texture")]
 use piston_window::{
     texture::{CreateTexture, Format},
