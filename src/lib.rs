@@ -312,10 +312,17 @@ fn triangle_contains(tri: &[[f32; 2]], point: [f32; 2]) -> bool {
 fn map_to_triangle(point: [f32; 2], from_tri: &[[f32; 2]], to_tri: &[[f32; 2]]) -> [f32; 2] {
     let t = from_tri;
     let p = point;
-    let bary_a = ((t[1][1] - t[2][1]) * (p[0] - t[2][0]) + (t[2][0] - t[1][0]) * (p[1] - t[2][1]))
-        / ((t[1][1] - t[2][1]) * (t[0][0] - t[2][0]) + (t[2][0] - t[1][0]) * (t[0][1] - t[2][1]));
-    let bary_b = ((t[2][1] - t[0][1]) * (p[0] - t[2][0]) + (t[0][0] - t[2][0]) * (p[1] - t[2][1]))
-        / ((t[1][1] - t[2][1]) * (t[0][0] - t[2][0]) + (t[2][0] - t[1][0]) * (t[0][1] - t[2][1]));
+    // Computer some values that are used multiple times
+    let a = t[1][1] - t[2][1];
+    let b = p[0] - t[2][0];
+    let c = t[2][0] - t[1][0];
+    let d = p[1] - t[2][1];
+    let e = t[0][0] - t[2][0];
+    let f = t[0][1] - t[2][1];
+    let g = t[2][1] - t[0][1];
+    let ae_cf = a * e + c * f;
+    let bary_a = (a * b + c * d) / ae_cf;
+    let bary_b = (g * b + e * d) / ae_cf;
     let bary_c = 1.0 - bary_a - bary_b;
     [
         bary_a * to_tri[0][0] + bary_b * to_tri[1][0] + bary_c * to_tri[2][0],
