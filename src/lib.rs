@@ -97,21 +97,21 @@ impl RenderBuffer {
         &self,
         factory: &mut GfxFactory,
         settings: &TextureSettings,
-    ) -> Result<G2dTexture, failure::Error> {
+    ) -> Result<G2dTexture, Box<error::Error>> {
         Ok(G2dTexture::from_image(factory, &self.inner, settings)?)
     }
 }
 
 #[cfg(feature = "piston_window_texture")]
 impl CreateTexture<()> for RenderBuffer {
-    type Error = failure::Error;
+    type Error = Box<error::Error>;
     fn create<S: Into<[u32; 2]>>(
         _factory: &mut (),
         _format: Format,
         memory: &[u8],
         size: S,
         _settings: &TextureSettings,
-    ) -> Result<Self, failure::Error> {
+    ) -> Result<Self, Box<error::Error>> {
         let size = size.into();
         Ok(RenderBuffer::from(
             RgbaImage::from_raw(size[0], size[1], memory.to_vec()).ok_or(
