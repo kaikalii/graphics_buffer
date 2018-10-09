@@ -8,13 +8,11 @@ extern crate image;
 #[cfg(feature = "piston_window_texture")]
 extern crate piston_window;
 extern crate rusttype;
-#[macro_use]
-extern crate failure;
 
 mod glyphs;
 pub use glyphs::*;
 
-use std::{fmt, ops, path::Path};
+use std::{error, fmt, ops, path::Path};
 
 use bit_vec::BitVec;
 use graphics::{draw_state::DrawState, math::Matrix2d, types::Color, Graphics, ImageSize};
@@ -31,7 +29,7 @@ pub fn identity() -> Matrix2d {
 }
 
 /// An Error type for `RenderBuffer`.
-#[derive(Debug, Clone, Fail)]
+#[derive(Debug, Clone)]
 pub enum Error {
     ContainerTooSmall(usize, usize),
 }
@@ -51,6 +49,8 @@ impl fmt::Display for Error {
         }
     }
 }
+
+impl error::Error for Error {}
 
 /// A buffer that can be rendered to with Piston's graphics library.
 #[derive(Debug, Clone)]

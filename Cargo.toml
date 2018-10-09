@@ -13,7 +13,6 @@ required-features = ['piston_window_texture']
 
 [dependencies]
 bit-vec = '0.5.0'
-failure = '0.1.2'
 image = '0.20.0'
 piston2d-graphics = '0.26.0'
 rusttype = '0.7.2'

@@ -1,6 +1,5 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, error};
 
-use failure;
 use graphics::{
     character::{Character, CharacterCache},
     types::{FontSize, Scalar},
@@ -50,7 +49,7 @@ impl<'f> BufferGlyphs<'f> {
 
 impl<'f> CharacterCache for BufferGlyphs<'f> {
     type Texture = RenderBuffer;
-    type Error = failure::Error;
+    type Error = Box<error::Error>;
     fn character<'a>(
         &'a mut self,
         font_size: FontSize,
@@ -92,7 +91,6 @@ impl<'f> CharacterCache for BufferGlyphs<'f> {
                     size: [h_metrics.advance_width as Scalar, 0 as Scalar],
                     texture,
                 }
-            })
-            .as_character())
+            }).as_character())
     }
 }
