@@ -179,27 +179,30 @@ impl Graphics for RenderBuffer {
                     br[0] = br[0].max(v[0]);
                     br[1] = br[1].max(v[1]);
                 }
-                let tl = [tl[0].floor() as i32, tl[1].floor() as i32];
-                let br = [br[0].ceil() as i32, br[1].ceil() as i32];
+                let tl = [tl[0].floor().max(0.0) as i32, tl[1].floor().max(0.0) as i32];
+                let br = [
+                    br[0].ceil().min(self.width() as f32) as i32,
+                    br[1].ceil().min(self.height() as f32) as i32,
+                ];
                 // Render
                 for x in tl[0]..br[0] {
+                    let mut entered = false;
                     for y in tl[1]..br[1] {
-                        if x >= 0
-                            && x < self.width() as i32
-                            && y >= 0
-                            && y < self.height() as i32
-                            && triangle_contains(tri, [x as f32, y as f32])
-                            && !self.used[x as usize].get(y as usize).unwrap_or(true)
-                        {
-                            let under_color =
-                                color_rgba_f32(self.inner.get_pixel(x as u32, y as u32));
-                            let layered_color = layer_color(&color, &under_color);
-                            self.inner.put_pixel(
-                                x as u32,
-                                y as u32,
-                                color_f32_rgba(&layered_color),
-                            );
-                            self.used[x as usize].set(y as usize, true);
+                        if triangle_contains(tri, [x as f32, y as f32]) {
+                            entered = true;
+                            if !self.used[x as usize].get(y as usize).unwrap_or(true) {
+                                let under_color =
+                                    color_rgba_f32(self.inner.get_pixel(x as u32, y as u32));
+                                let layered_color = layer_color(&color, &under_color);
+                                self.inner.put_pixel(
+                                    x as u32,
+                                    y as u32,
+                                    color_f32_rgba(&layered_color),
+                                );
+                                self.used[x as usize].set(y as usize, true);
+                            }
+                        } else if entered {
+                            break;
                         }
                     }
                 }
@@ -228,18 +231,17 @@ impl Graphics for RenderBuffer {
                     br[0] = br[0].max(v[0]);
                     br[1] = br[1].max(v[1]);
                 }
-                let tl = [tl[0].floor() as i32, tl[1].floor() as i32];
-                let br = [br[0].ceil() as i32, br[1].ceil() as i32];
+                let tl = [tl[0].floor().max(0.0) as i32, tl[1].floor().max(0.0) as i32];
+                let br = [
+                    br[0].ceil().min((self.width() - 1) as f32) as i32,
+                    br[1].ceil().min((self.height() - 1) as f32) as i32,
+                ];
                 // Render
                 let scaled_tex_tri = tri_image_scale(tex_tri, texture.get_size());
                 for x in tl[0]..br[0] {
+                    let mut entered = false;
                     for y in tl[1]..br[1] {
-                        if x >= 0
-                            && x < self.width() as i32
-                            && y >= 0
-                            && y < self.height() as i32
-                            && triangle_contains(tri, [x as f32, y as f32])
-                        {
+                        if triangle_contains(tri, [x as f32, y as f32]) {
                             let mapped_point =
                                 map_to_triangle([x as f32, y as f32], tri, &scaled_tex_tri);
                             let texel = color_rgba_f32(texture.get_pixel(
@@ -255,6 +257,8 @@ impl Graphics for RenderBuffer {
                                 color_f32_rgba(&layered_color),
                             );
                             self.used[x as usize].set(y as usize, true);
+                        } else if entered {
+                            break;
                         }
                     }
                 }
