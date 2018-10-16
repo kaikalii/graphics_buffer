@@ -20,7 +20,7 @@ or, if you want to be able to draw the texture to a window using [`piston_window
 ```toml
 graphics_buffer = { version = "0.3.7", features = ["piston_window_texture"] }
 piston2d-graphics = "0.26.0"
-piston_window = "0.81.0"
+piston_window = "0.82.0"
 ```
 
 Here is a simple example that draws three circles and saves the image to a file:

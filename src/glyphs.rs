@@ -8,6 +8,7 @@ use rusttype::{point, Error, Font, GlyphId, Rect, Scale};
 
 use super::*;
 
+#[derive(Clone)]
 struct CharacterDef {
     offset: [Scalar; 2],
     size: [Scalar; 2],
@@ -25,6 +26,7 @@ impl CharacterDef {
 }
 
 /// A character cache for drawing text to a `RenderBuffer`.
+#[derive(Clone)]
 pub struct BufferGlyphs<'f> {
     characters: HashMap<(char, u32), CharacterDef>,
     font: Font<'f>,
