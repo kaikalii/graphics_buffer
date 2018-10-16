@@ -19,7 +19,7 @@ rusttype = '0.7.2'
 
 [dependencies.piston_window]
 optional = true
-version = '0.81.0'
+version = '0.82.0'
 
 [features]
 piston_window_texture = ['piston_window']
@@ -43,4 +43,4 @@ license = 'MIT'
 name = 'graphics_buffer'
 readme = 'readme.md'
 repository = 'https://github.com/kaikalii/graphics_buffer'
-version = '0.3.6'
+version = '0.3.7'
