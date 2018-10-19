@@ -15,6 +15,7 @@ required-features = ['piston_window_texture']
 bit-vec = '0.5.0'
 image = '0.20.0'
 piston2d-graphics = '0.26.0'
+rayon = '1.0.2'
 rusttype = '0.7.2'
 
 [dependencies.piston_window]
@@ -43,4 +44,4 @@ license = 'MIT'
 name = 'graphics_buffer'
 readme = 'readme.md'
 repository = 'https://github.com/kaikalii/graphics_buffer'
-version = '0.3.8'
+version = '0.4'

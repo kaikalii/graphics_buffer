@@ -7,6 +7,7 @@ extern crate graphics;
 extern crate image;
 #[cfg(feature = "piston_window_texture")]
 extern crate piston_window;
+extern crate rayon;
 extern crate rusttype;
 
 mod glyphs;
@@ -22,6 +23,7 @@ use piston_window::{
     texture::{CreateTexture, Format},
     G2dTexture, GfxFactory, TextureSettings,
 };
+use rayon::prelude::*;
 
 /// Returns the identity matrix: `[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]`.
 pub fn identity() -> Matrix2d {
@@ -185,27 +187,37 @@ impl Graphics for RenderBuffer {
                     br[1].ceil().min(self.height() as f32) as i32,
                 ];
                 // Render
-                for x in tl[0]..br[0] {
+                let inner = &self.inner;
+                let used = &self.used;
+                (tl[0]..br[0]).into_par_iter().for_each(|x| {
                     let mut entered = false;
                     for y in tl[1]..br[1] {
                         if triangle_contains(tri, [x as f32, y as f32]) {
                             entered = true;
-                            if !self.used[x as usize].get(y as usize).unwrap_or(true) {
+                            if !used[x as usize].get(y as usize).unwrap_or(true) {
                                 let under_color =
-                                    color_rgba_f32(self.inner.get_pixel(x as u32, y as u32));
+                                    color_rgba_f32(inner.get_pixel(x as u32, y as u32));
                                 let layered_color = layer_color(&color, &under_color);
-                                self.inner.put_pixel(
-                                    x as u32,
-                                    y as u32,
-                                    color_f32_rgba(&layered_color),
-                                );
-                                self.used[x as usize].set(y as usize, true);
+                                unsafe {
+                                    (inner as *const RgbaImage as *mut RgbaImage)
+                                        .as_mut()
+                                        .unwrap()
+                                        .put_pixel(
+                                            x as u32,
+                                            y as u32,
+                                            color_f32_rgba(&layered_color),
+                                        );
+                                    (used as *const Vec<BitVec> as *mut Vec<BitVec>)
+                                        .as_mut()
+                                        .unwrap()[x as usize]
+                                        .set(y as usize, true);
+                                }
                             }
                         } else if entered {
                             break;
                         }
                     }
-                }
+                });
             }
         });
     }
@@ -238,10 +250,13 @@ impl Graphics for RenderBuffer {
                 ];
                 // Render
                 let scaled_tex_tri = tri_image_scale(tex_tri, texture.get_size());
-                for x in tl[0]..br[0] {
+                let inner = &self.inner;
+                let used = &self.used;
+                (tl[0]..br[0]).into_par_iter().for_each(|x| {
                     let mut entered = false;
                     for y in tl[1]..br[1] {
                         if triangle_contains(tri, [x as f32, y as f32]) {
+                            entered = true;
                             let mapped_point =
                                 map_to_triangle([x as f32, y as f32], tri, &scaled_tex_tri);
                             let texel = color_rgba_f32(texture.get_pixel(
@@ -249,19 +264,23 @@ impl Graphics for RenderBuffer {
                                 (mapped_point[1].round() as u32).min(texture.height() - 1),
                             ));
                             let over_color = color_mul(color, &texel);
-                            let under_color = color_rgba_f32(self.get_pixel(x as u32, y as u32));
+                            let under_color = color_rgba_f32(inner.get_pixel(x as u32, y as u32));
                             let layered_color = layer_color(&over_color, &under_color);
-                            self.inner.put_pixel(
-                                x as u32,
-                                y as u32,
-                                color_f32_rgba(&layered_color),
-                            );
-                            self.used[x as usize].set(y as usize, true);
+                            unsafe {
+                                (inner as *const RgbaImage as *mut RgbaImage)
+                                    .as_mut()
+                                    .unwrap()
+                                    .put_pixel(x as u32, y as u32, color_f32_rgba(&layered_color));
+                                (used as *const Vec<BitVec> as *mut Vec<BitVec>)
+                                    .as_mut()
+                                    .unwrap()[x as usize]
+                                    .set(y as usize, true);
+                            }
                         } else if entered {
                             break;
                         }
                     }
-                }
+                });
             }
         });
     }
