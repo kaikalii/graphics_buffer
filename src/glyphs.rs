@@ -57,14 +57,15 @@ impl<'f> CharacterCache for BufferGlyphs<'f> {
         font_size: FontSize,
         ch: char,
     ) -> Result<Character<'a, Self::Texture>, Self::Error> {
+        let font = &self.font;
         Ok(self
             .characters
             .entry((ch, font_size))
-            .or_insert({
+            .or_insert_with(|| {
                 let scale = Scale::uniform(font_size as f32);
-                let glyph = self.font.glyph(ch).scaled(scale);
+                let glyph = font.glyph(ch).scaled(scale);
                 let glyph = if glyph.id() == GlyphId(0) && glyph.shape().is_none() {
-                    self.font.glyph('\u{FFFD}').scaled(scale)
+                    font.glyph('\u{FFFD}').scaled(scale)
                 } else {
                     glyph
                 };
