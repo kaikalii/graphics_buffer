@@ -83,7 +83,7 @@ impl RenderBuffer {
     }
     /// Returns the color of the pixel at the given coordinates.
     pub fn pixel(&self, x: u32, y: u32) -> [f32; 4] {
-        color_rgba_f32(self.inner.get_pixel(x, y))
+        color_rgba_f32(*self.inner.get_pixel(x, y))
     }
     /// Sets the color of the pixel at the given coordinates.
     pub fn set_pixel(&mut self, x: u32, y: u32, color: [f32; 4]) {
@@ -196,7 +196,7 @@ impl Graphics for RenderBuffer {
                             entered = true;
                             if !used[x as usize].get(y as usize).unwrap_or(true) {
                                 let under_color =
-                                    color_rgba_f32(inner.get_pixel(x as u32, y as u32));
+                                    color_rgba_f32(*inner.get_pixel(x as u32, y as u32));
                                 let layered_color = layer_color(&color, &under_color);
                                 unsafe {
                                     (inner as *const RgbaImage as *mut RgbaImage)
@@ -259,12 +259,12 @@ impl Graphics for RenderBuffer {
                             entered = true;
                             let mapped_point =
                                 map_to_triangle([x as f32, y as f32], tri, &scaled_tex_tri);
-                            let texel = color_rgba_f32(texture.get_pixel(
+                            let texel = color_rgba_f32(*texture.get_pixel(
                                 (mapped_point[0].round() as u32).min(texture.width() - 1),
                                 (mapped_point[1].round() as u32).min(texture.height() - 1),
                             ));
                             let over_color = color_mul(color, &texel);
-                            let under_color = color_rgba_f32(inner.get_pixel(x as u32, y as u32));
+                            let under_color = color_rgba_f32(*inner.get_pixel(x as u32, y as u32));
                             let layered_color = layer_color(&over_color, &under_color);
                             unsafe {
                                 (inner as *const RgbaImage as *mut RgbaImage)
@@ -297,12 +297,12 @@ fn color_f32_rgba(color: &[f32; 4]) -> Rgba<u8> {
     }
 }
 
-fn color_rgba_f32(color: &Rgba<u8>) -> [f32; 4] {
+fn color_rgba_f32(color: Rgba<u8>) -> [f32; 4] {
     [
-        (color.data[0] as f32) / 255.0,
-        (color.data[1] as f32) / 255.0,
-        (color.data[2] as f32) / 255.0,
-        (color.data[3] as f32) / 255.0,
+        f32::from(color.data[0]) / 255.0,
+        f32::from(color.data[1]) / 255.0,
+        f32::from(color.data[2]) / 255.0,
+        f32::from(color.data[3]) / 255.0,
     ]
 }
 
@@ -311,13 +311,13 @@ fn color_mul(a: &[f32; 4], b: &[f32; 4]) -> [f32; 4] {
 }
 
 fn layer_color(over: &[f32; 4], under: &[f32; 4]) -> [f32; 4] {
-    let over_weight = over[3];
+    let over_weight = 1.0 - (1.0 - over[3]).powf(2.0);
     let under_weight = 1.0 - over_weight;
     [
         over_weight * over[0] + under_weight * under[0],
         over_weight * over[1] + under_weight * under[1],
         over_weight * over[2] + under_weight * under[2],
-        over[3].max(under[3]),
+        (over[3].powf(2.0) + under[3].powf(2.0)).sqrt().min(1.0),
     ]
 }
 
