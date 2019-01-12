@@ -2,16 +2,8 @@
 
 // !There is also an optional feature for `RenderBuffer` that allows it to be converted into a `G2dTexture` so that it can be rendered with [`piston_window`](https://github.com/PistonDevelopers/piston_window). To enable this, add `features = ["piston_window_texture"]` to the `graphics_buffer` dependency in your `cargo.toml`.
 
-extern crate bit_vec;
-extern crate graphics;
-extern crate image;
-#[cfg(feature = "piston_window_texture")]
-extern crate piston_window;
-extern crate rayon;
-extern crate rusttype;
-
 mod glyphs;
-pub use glyphs::*;
+pub use crate::glyphs::*;
 
 use std::{error, fmt, ops, path::Path};
 
@@ -25,10 +17,8 @@ use piston_window::{
 };
 use rayon::prelude::*;
 
-/// Returns the identity matrix: `[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]`.
-pub fn identity() -> Matrix2d {
-    [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
-}
+/// The identity matrix: `[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]`.
+pub const IDENTITY: Matrix2d = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]];
 
 /// An Error type for `RenderBuffer`.
 #[derive(Debug, Clone)]
@@ -37,7 +27,7 @@ pub enum Error {
 }
 
 impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Error::ContainerTooSmall(len, area) => write!(
                 f,
@@ -71,11 +61,11 @@ impl RenderBuffer {
     }
     /// Creates a new `RenderBuffer` by opening it from a file.
     pub fn open<P: AsRef<Path>>(path: P) -> ImageResult<RenderBuffer> {
-        image::open(path).map(|di| RenderBuffer::from(di))
+        image::open(path).map(RenderBuffer::from)
     }
     /// Creates a new `RenderBuffer` by decoding image data.
     pub fn decode_from_bytes(bytes: &[u8]) -> ImageResult<RenderBuffer> {
-        image::load_from_memory(bytes).map(|di| RenderBuffer::from(di))
+        image::load_from_memory(bytes).map(RenderBuffer::from)
     }
     /// Clear the buffer with a color.
     pub fn clear(&mut self, color: [f32; 4]) {
@@ -166,7 +156,7 @@ impl Graphics for RenderBuffer {
     fn clear_stencil(&mut self, _value: u8) {}
     fn tri_list<F>(&mut self, _draw_state: &DrawState, color: &[f32; 4], mut f: F)
     where
-        F: FnMut(&mut FnMut(&[[f32; 2]])),
+        F: FnMut(&mut dyn FnMut(&[[f32; 2]])),
     {
         self.reset_used();
         // Render Triangles
@@ -228,7 +218,7 @@ impl Graphics for RenderBuffer {
         texture: &Self::Texture,
         mut f: F,
     ) where
-        F: FnMut(&mut FnMut(&[[f32; 2]], &[[f32; 2]])),
+        F: FnMut(&mut dyn FnMut(&[[f32; 2]], &[[f32; 2]])),
     {
         self.reset_used();
         // Render Triangles

@@ -11,14 +11,14 @@ There is also an optional feature for `RenderBuffer` that allows it to be conver
 Add this to your `cargo.toml` :
 
 ```toml
-graphics_buffer = "0.4.4"
+graphics_buffer = "0.5.0"
 piston2d-graphics = "0.26.0"
 ```
 
 or, if you want to be able to draw the texture to a window using [`piston_window`](https://github.com/PistonDevelopers/piston_window) :
 
 ```toml
-graphics_buffer = { version = "0.4.4", features = ["piston_window_texture"] }
+graphics_buffer = { version = "0.5.0", features = ["piston_window_texture"] }
 piston2d-graphics = "0.26.0"
 piston_window = "0.82.0"
 ```
@@ -41,21 +41,21 @@ fn main() {
     ellipse(
         [1.0, 0.0, 0.0, 0.7],
         [0.0, 0.0, 100.0, 100.0],
-        identity(),
+        IDENTITY,
         &mut buffer,
     );
     // Small blue circle
     ellipse(
         [0.0, 0.0, 1.0, 0.7],
         [0.0, 0.0, 50.0, 50.0],
-        identity(),
+        IDENTITY,
         &mut buffer,
     );
     // Small green circle
     ellipse(
         [0.0, 1.0, 0.0, 0.7],
         [50.0, 50.0, 50.0, 50.0],
-        identity(),
+        IDENTITY,
         &mut buffer,
     );
 

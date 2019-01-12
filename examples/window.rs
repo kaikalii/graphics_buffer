@@ -1,7 +1,3 @@
-extern crate graphics;
-extern crate graphics_buffer;
-extern crate piston_window;
-
 use graphics::{ellipse, image, text, Transformed};
 use graphics_buffer::*;
 use piston_window::{
@@ -20,21 +16,21 @@ fn main() {
     buffer.clear([0.0, 0.0, 0.0, 1.0]);
 
     // Draw Matt to the buffer
-    image(&matt, identity(), &mut buffer);
+    image(&matt, IDENTITY, &mut buffer);
 
     // Give Matt red eyes
-    let red = [1.0, 0.0, 0.0, 0.7];
-    let diameter = 40.0;
+    const RED: [f32; 4] = [1.0, 0.0, 0.0, 0.7];
+    const DIAMETER: f64 = 40.0;
     ellipse(
-        red,
-        [115.0, 175.0, diameter, diameter],
-        identity(),
+        RED,
+        [115.0, 175.0, DIAMETER, DIAMETER],
+        IDENTITY,
         &mut buffer,
     );
     ellipse(
-        red,
-        [210.0, 195.0, diameter, diameter],
-        identity(),
+        RED,
+        [210.0, 195.0, DIAMETER, DIAMETER],
+        IDENTITY,
         &mut buffer,
     );
 
@@ -44,17 +40,19 @@ fn main() {
         70,
         "# w o k e",
         &mut glyphs,
-        identity().trans(40.0, 70.0),
+        IDENTITY.trans(40.0, 70.0),
         &mut buffer,
-    ).unwrap();
+    )
+    .unwrap();
 
     // Create a window
     let mut window: PistonWindow = WindowSettings::new(
         "piston_window texture example",
         (matt.height(), matt.height()),
-    ).exit_on_esc(true)
-        .build()
-        .unwrap();
+    )
+    .exit_on_esc(true)
+    .build()
+    .unwrap();
 
     // Create a texture from red-eyed Matt
     let matt_texture = buffer
@@ -64,6 +62,7 @@ fn main() {
     // Initialize a rotation
     let mut rot = 0.0;
 
+    // Run the event loop
     while let Some(event) = window.next() {
         match event {
             Event::Loop(Loop::Render(..)) => {

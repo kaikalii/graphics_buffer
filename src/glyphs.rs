@@ -16,7 +16,7 @@ struct CharacterDef {
 }
 
 impl CharacterDef {
-    fn as_character<'a>(&'a self) -> Character<'a, RenderBuffer> {
+    fn as_character(&self) -> Character<'_, RenderBuffer> {
         Character {
             offset: self.offset,
             size: self.size,
@@ -51,12 +51,12 @@ impl<'f> BufferGlyphs<'f> {
 
 impl<'f> CharacterCache for BufferGlyphs<'f> {
     type Texture = RenderBuffer;
-    type Error = Box<error::Error>;
-    fn character<'a>(
-        &'a mut self,
+    type Error = Box<dyn error::Error>;
+    fn character(
+        &mut self,
         font_size: FontSize,
         ch: char,
-    ) -> Result<Character<'a, Self::Texture>, Self::Error> {
+    ) -> Result<Character<'_, Self::Texture>, Self::Error> {
         let font = &self.font;
         Ok(self
             .characters
@@ -88,12 +88,13 @@ impl<'f> CharacterCache for BufferGlyphs<'f> {
                 });
                 CharacterDef {
                     offset: [
-                        bounding_box.min.x as Scalar - 1.0,
-                        -pixel_bounding_box.min.y as Scalar + 1.0,
+                        Scalar::from(bounding_box.min.x) - 1.0,
+                        Scalar::from(-pixel_bounding_box.min.y) + 1.0,
                     ],
-                    size: [h_metrics.advance_width as Scalar, 0 as Scalar],
+                    size: [Scalar::from(h_metrics.advance_width), Scalar::from(0)],
                     texture,
                 }
-            }).as_character())
+            })
+            .as_character())
     }
 }

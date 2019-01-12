@@ -1,6 +1,3 @@
-extern crate graphics;
-extern crate graphics_buffer;
-
 use graphics::{text, Transformed};
 use graphics_buffer::*;
 
@@ -14,13 +11,14 @@ fn main() {
 
     // Draw text
     text(
-        [1.0, 1.0, 1.0, 1.0],
+        [1.0; 4],
         30,
         "Oh boy!",
         &mut glyphs,
-        identity().trans(10.0, 30.0),
+        IDENTITY.trans(10.0, 30.0),
         &mut buffer,
-    ).unwrap();
+    )
+    .unwrap();
 
     // Save the image
     buffer.save("text.png").unwrap();

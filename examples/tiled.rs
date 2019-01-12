@@ -1,6 +1,3 @@
-extern crate graphics;
-extern crate graphics_buffer;
-
 use graphics::{Image, Transformed};
 use graphics_buffer::*;
 
@@ -25,7 +22,7 @@ fn main() {
         Image::new_color(*color).draw(
             &matt,
             &Default::default(),
-            identity().trans(*x, *y),
+            IDENTITY.trans(*x, *y),
             &mut buffer,
         );
     }
