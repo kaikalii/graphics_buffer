@@ -220,10 +220,12 @@ impl Graphics for RenderBuffer {
     ) where
         F: FnMut(&mut dyn FnMut(&[[f32; 2]], &[[f32; 2]])),
     {
+        println!("tri_list_uv");
         self.reset_used();
         // Render Triangles
         f(&mut |vertices, tex_vertices| {
             for (tri, tex_tri) in vertices.chunks(3).zip(tex_vertices.chunks(3)) {
+                println!("\ttri: {:?}", tri);
                 // Get tri bounds for efficiency
                 let mut tl = [0f32, 0f32];
                 let mut br = [0f32, 0f32];
@@ -238,13 +240,21 @@ impl Graphics for RenderBuffer {
                     br[0].ceil().min((self.width() - 1) as f32) as i32,
                     br[1].ceil().min((self.height() - 1) as f32) as i32,
                 ];
+                let avg_y = ((tri[0][1] + tri[1][1] + tri[2][1]) / 3.0) as i32;
+                let vert_center = (br[1] - tl[1]) / 2;
+                let vertical_balance_top = avg_y < vert_center;
                 // Render
                 let scaled_tex_tri = tri_image_scale(tex_tri, texture.get_size());
                 let inner = &self.inner;
                 let used = &self.used;
                 (tl[0]..br[0]).into_par_iter().for_each(|x| {
                     let mut entered = false;
-                    for y in tl[1]..br[1] {
+                    let range: Box<Iterator<Item = i32>> = if vertical_balance_top {
+                        Box::new(tl[1]..br[1])
+                    } else {
+                        Box::new((tl[1]..br[1]).rev())
+                    };
+                    for y in range {
                         if triangle_contains(tri, [x as f32, y as f32]) {
                             entered = true;
                             let mapped_point =
