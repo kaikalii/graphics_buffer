@@ -1,6 +1,15 @@
-//! This library provides a buffer which can be used as a render target for [Piston's graphics library](https://github.com/PistonDevelopers/graphics). This buffer can be loaded from and/or saved to a file on disk. This allows for things like screenshots in games.
+/*!
+This library provides a buffer which can be used as a render target for
+[Piston's graphics library](https://github.com/PistonDevelopers/graphics).
+This buffer can be loaded from and/or saved to a file on disk. This allows
+for things like screenshots in games.
 
-// !There is also an optional feature for `RenderBuffer` that allows it to be converted into a `G2dTexture` so that it can be rendered with [`piston_window`](https://github.com/PistonDevelopers/piston_window). To enable this, add `features = ["piston_window_texture"]` to the `graphics_buffer` dependency in your `cargo.toml`.
+There is also an optional feature for `RenderBuffer` that allows it to be
+converted into a `G2dTexture` so that it can be rendered with
+[`piston_window`](https://github.com/PistonDevelopers/piston_window). To
+enable this, add `features = ["piston_window_texture"]` to the `graphics_buffer`
+dependency in your `cargo.toml`.
+*/
 
 mod glyphs;
 pub use crate::glyphs::*;
@@ -220,12 +229,10 @@ impl Graphics for RenderBuffer {
     ) where
         F: FnMut(&mut dyn FnMut(&[[f32; 2]], &[[f32; 2]])),
     {
-        println!("tri_list_uv");
         self.reset_used();
         // Render Triangles
         f(&mut |vertices, tex_vertices| {
             for (tri, tex_tri) in vertices.chunks(3).zip(tex_vertices.chunks(3)) {
-                println!("\ttri: {:?}", tri);
                 // Get tri bounds for efficiency
                 let mut tl = [0f32, 0f32];
                 let mut br = [0f32, 0f32];
