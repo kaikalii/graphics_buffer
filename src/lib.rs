@@ -14,7 +14,7 @@ dependency in your `cargo.toml`.
 mod glyphs;
 pub use crate::glyphs::*;
 
-use std::{error, fmt, ops, path::Path};
+use std::{error, fmt, fs::File, ops, path::Path};
 
 use bit_vec::BitVec;
 use graphics::{draw_state::DrawState, math::Matrix2d, types::Color, Graphics, ImageSize};
@@ -24,6 +24,7 @@ use piston_window::{
     texture::{CreateTexture, Format},
     G2dTexture, GfxFactory, TextureSettings,
 };
+use png::{Decoder as PngDecoder, Limits};
 use rayon::prelude::*;
 
 /// The identity matrix: `[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]`.
@@ -69,8 +70,28 @@ impl RenderBuffer {
         }
     }
     /// Creates a new `RenderBuffer` by opening it from a file.
-    pub fn open<P: AsRef<Path>>(path: P) -> ImageResult<RenderBuffer> {
-        image::open(path).map(RenderBuffer::from)
+    pub fn open<P: AsRef<Path>>(path: P) -> Result<RenderBuffer, Box<dyn error::Error>> {
+        if path
+            .as_ref()
+            .extension()
+            .map(|ext| ext == "png")
+            .unwrap_or(false)
+        {
+            let (info, mut reader) = PngDecoder::new_with_limits(
+                File::open(path)?,
+                Limits {
+                    pixels: std::u64::MAX,
+                },
+            )
+            .read_info()?;
+            let mut buf = vec![0; info.buffer_size()];
+            reader.next_frame(&mut buf)?;
+            let image = image::RgbaImage::from_raw(info.width, info.height, buf)
+                .expect("Invalid image buffer data");
+            Ok(image.into())
+        } else {
+            Ok(image::open(path)?.into())
+        }
     }
     /// Creates a new `RenderBuffer` by decoding image data.
     pub fn decode_from_bytes(bytes: &[u8]) -> ImageResult<RenderBuffer> {
