@@ -11,16 +11,16 @@ There is also an optional feature for `RenderBuffer` that allows it to be conver
 Add this to your `cargo.toml` :
 
 ```toml
-graphics_buffer = "0.5.4"
+graphics_buffer = "0.5.5"
 piston2d-graphics = "0.30.0"
 ```
 
 or, if you want to be able to draw the texture to a window using [`piston_window`](https://github.com/PistonDevelopers/piston_window) :
 
 ```toml
-graphics_buffer = { version = "0.5.4", features = ["piston_window_texture"] }
+graphics_buffer = { version = "0.5.5", features = ["piston_window_texture"] }
 piston2d-graphics = "0.30.0"
-piston_window = "0.88.0"
+piston_window = "0.89.0"
 ```
 
 Here is a simple example that draws three circles and saves the image to a file:
