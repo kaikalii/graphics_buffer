@@ -1,3 +1,5 @@
+#![deny(missing_docs)]
+
 /*!
 This library provides a buffer which can be used as a render target for
 [Piston's graphics library](https://github.com/PistonDevelopers/graphics).
@@ -14,7 +16,9 @@ dependency in your `cargo.toml`.
 mod glyphs;
 pub use crate::glyphs::*;
 
-use std::{error, fmt, fs::File, ops, path::Path};
+#[cfg(feature = "piston_window_texture")]
+use std::fmt;
+use std::{error, fs::File, ops, path::Path};
 
 use bit_vec::BitVec;
 use graphics::{draw_state::DrawState, math::Matrix2d, types::Color, Graphics, ImageSize};
@@ -31,11 +35,14 @@ use rayon::prelude::*;
 pub const IDENTITY: Matrix2d = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]];
 
 /// An Error type for `RenderBuffer`.
+#[cfg(feature = "piston_window_texture")]
 #[derive(Debug, Clone)]
 pub enum Error {
+    /// Pixels/bytes mismatch when creating texture
     ContainerTooSmall(usize, usize),
 }
 
+#[cfg(feature = "piston_window_texture")]
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -52,6 +59,7 @@ impl fmt::Display for Error {
     }
 }
 
+#[cfg(feature = "piston_window_texture")]
 impl error::Error for Error {}
 
 /// A buffer that can be rendered to with Piston's graphics library.
