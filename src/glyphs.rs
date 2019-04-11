@@ -1,4 +1,4 @@
-use std::{collections::HashMap, error};
+use std::{collections::HashMap, convert::Infallible};
 
 use graphics::{
     character::{Character, CharacterCache},
@@ -51,7 +51,7 @@ impl<'f> BufferGlyphs<'f> {
 
 impl<'f> CharacterCache for BufferGlyphs<'f> {
     type Texture = RenderBuffer;
-    type Error = Box<dyn error::Error>;
+    type Error = Infallible;
     fn character(
         &mut self,
         font_size: FontSize,
