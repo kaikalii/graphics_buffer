@@ -86,7 +86,7 @@ impl RenderBuffer {
             .unwrap_or(false)
         {
             let (info, mut reader) = PngDecoder::new_with_limits(
-                File::open(path)?,
+                File::open(&path)?,
                 Limits {
                     pixels: std::u64::MAX,
                 },
@@ -94,9 +94,13 @@ impl RenderBuffer {
             .read_info()?;
             let mut buf = vec![0; info.buffer_size()];
             reader.next_frame(&mut buf)?;
-            let image = image::RgbaImage::from_raw(info.width, info.height, buf)
-                .expect("Invalid image buffer data");
-            Ok(image.into())
+            Ok(
+                if let Some(image) = image::RgbaImage::from_raw(info.width, info.height, buf) {
+                    image.into()
+                } else {
+                    image::open(path)?.into()
+                },
+            )
         } else {
             Ok(image::open(path)?.into())
         }
