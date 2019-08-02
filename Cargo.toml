@@ -12,18 +12,19 @@ name = 'window'
 required-features = ['piston_window_texture']
 
 [dependencies]
-bit-vec = '0.5.1'
-image = '0.21.0'
-piston2d-graphics = '0.30.0'
-png = '0.14.0'
-rayon = '1.0.3'
-rusttype = '0.7.5'
+bit-vec = '0.6.1'
+image = '0.22.1'
+piston2d-graphics = { version = '0.33.0', features = ['glyph_cache_rusttype'] }
+piston-texture = "*"
+png = '0.15.0'
+rayon = '1.1.0'
 
 [dependencies.piston_window]
 optional = true
-version = '0.89.0'
+version = '0.102.0'
 
 [features]
+default = []
 piston_window_texture = ['piston_window']
 
 [package]

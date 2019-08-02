@@ -9,7 +9,7 @@ fn main() {
     let matt = RenderBuffer::decode_from_bytes(include_bytes!("matt.jpg")).unwrap();
 
     // Load the font and initialize glyphs
-    let mut glyphs = BufferGlyphs::from_bytes(include_bytes!("roboto.ttf")).unwrap();
+    let mut glyphs = buffer_glyphs_from_bytes(include_bytes!("roboto.ttf")).unwrap();
 
     // Initalize the buffer
     let mut buffer = RenderBuffer::new(matt.width(), matt.height());
@@ -40,7 +40,7 @@ fn main() {
         70,
         "# w o k e",
         &mut glyphs,
-        IDENTITY.trans(40.0, 70.0),
+        IDENTITY.trans(0.0, 70.0),
         &mut buffer,
     )
     .unwrap();
@@ -56,7 +56,10 @@ fn main() {
 
     // Create a texture from red-eyed Matt
     let matt_texture = buffer
-        .to_g2d_texture(&mut window.factory, &TextureSettings::new())
+        .to_g2d_texture(
+            &mut window.create_texture_context(),
+            &TextureSettings::new(),
+        )
         .unwrap();
 
     // Initialize a rotation
@@ -66,17 +69,18 @@ fn main() {
     while let Some(event) = window.next() {
         match event {
             Event::Loop(Loop::Render(..)) => {
-                window.draw_2d(&event, |c, g| {
+                window.draw_2d(&event, |context, graphics, _| {
                     // Clear window with black
-                    clear([0.0, 0.0, 0.0, 1.0], g);
+                    clear([0.0, 0.0, 0.0, 1.0], graphics);
                     // Draw matt rotated and scaled
                     image(
                         &matt_texture,
-                        c.transform
+                        context
+                            .transform
                             .trans(matt.height() as f64 / 2.0, matt.height() as f64 / 2.0)
                             .scale(0.5, 0.5)
                             .rot_rad(rot),
-                        g,
+                        graphics,
                     );
                 });
             }

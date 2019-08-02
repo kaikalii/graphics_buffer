@@ -1,100 +1,21 @@
-use std::{collections::HashMap, convert::Infallible};
+use std::{io, path::Path};
 
-use graphics::{
-    character::{Character, CharacterCache},
-    types::{FontSize, Scalar},
-};
-use rusttype::{point, Error, Font, GlyphId, Rect, Scale};
+use graphics::glyph_cache::rusttype;
+use texture::TextureSettings;
 
-use super::*;
-
-#[derive(Clone)]
-struct CharacterDef {
-    offset: [Scalar; 2],
-    size: [Scalar; 2],
-    texture: RenderBuffer,
-}
-
-impl CharacterDef {
-    fn as_character(&self) -> Character<'_, RenderBuffer> {
-        Character {
-            offset: self.offset,
-            size: self.size,
-            texture: &self.texture,
-        }
-    }
-}
+use crate::RenderBuffer;
 
 /// A character cache for drawing text to a `RenderBuffer`.
-#[derive(Clone)]
-pub struct BufferGlyphs<'f> {
-    characters: HashMap<(char, u32), CharacterDef>,
-    font: Font<'f>,
+///
+/// If the link to the `GlyphCache` type is not working,
+/// try generating the docs yourself.
+pub type BufferGlyphs<'a> = rusttype::GlyphCache<'a, (), RenderBuffer>;
+
+/// Create a `BufferGlyphs` from some font data
+pub fn buffer_glyphs_from_bytes<'a>(font_data: &'a [u8]) -> Result<BufferGlyphs<'a>, ()> {
+    BufferGlyphs::from_bytes(font_data, (), TextureSettings::new())
 }
-
-impl<'f> BufferGlyphs<'f> {
-    /// Loads a `BufferGlyphs` from an array of font data.
-    pub fn from_bytes(bytes: &'f [u8]) -> Result<BufferGlyphs<'f>, Error> {
-        Ok(BufferGlyphs {
-            characters: HashMap::new(),
-            font: Font::from_bytes(bytes)?,
-        })
-    }
-    /// Loads a `BufferGlyphs` from a `Font`.
-    pub fn from_font(font: Font<'f>) -> BufferGlyphs<'f> {
-        BufferGlyphs {
-            characters: HashMap::new(),
-            font,
-        }
-    }
-}
-
-impl<'f> CharacterCache for BufferGlyphs<'f> {
-    type Texture = RenderBuffer;
-    type Error = Infallible;
-    fn character(
-        &mut self,
-        font_size: FontSize,
-        ch: char,
-    ) -> Result<Character<'_, Self::Texture>, Self::Error> {
-        let font = &self.font;
-        Ok(self
-            .characters
-            .entry((ch, font_size))
-            .or_insert_with(|| {
-                let scale = Scale::uniform(font_size as f32);
-                let glyph = font.glyph(ch).scaled(scale);
-                let glyph = if glyph.id() == GlyphId(0) && glyph.shape().is_none() {
-                    font.glyph('\u{FFFD}').scaled(scale)
-                } else {
-                    glyph
-                };
-                let h_metrics = glyph.h_metrics();
-                let bounding_box = glyph.exact_bounding_box().unwrap_or(Rect {
-                    min: point(0.0, 0.0),
-                    max: point(0.0, 0.0),
-                });
-                let glyph = glyph.positioned(point(0.0, 0.0));
-                let pixel_bounding_box = glyph.pixel_bounding_box().unwrap_or(Rect {
-                    min: point(0, 0),
-                    max: point(0, 0),
-                });
-                let pixel_bb_width = pixel_bounding_box.width() + 2;
-                let pixel_bb_height = pixel_bounding_box.height() + 2;
-
-                let mut texture = RenderBuffer::new(pixel_bb_width as u32, pixel_bb_height as u32);
-                glyph.draw(|x, y, v| {
-                    texture.set_pixel(x, y, [1.0, 1.0, 1.0, v]);
-                });
-                CharacterDef {
-                    offset: [
-                        Scalar::from(bounding_box.min.x) - 1.0,
-                        Scalar::from(-pixel_bounding_box.min.y) + 1.0,
-                    ],
-                    size: [Scalar::from(h_metrics.advance_width), Scalar::from(0)],
-                    texture,
-                }
-            })
-            .as_character())
-    }
+/// Create a `BufferGlyphs` from a path to some font
+pub fn buffer_glyphs_from_path<'a, P: AsRef<Path>>(font_path: P) -> io::Result<BufferGlyphs<'a>> {
+    BufferGlyphs::new(font_path, (), TextureSettings::new())
 }

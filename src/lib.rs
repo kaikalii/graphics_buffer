@@ -16,37 +16,31 @@ dependency in your `cargo.toml`.
 mod glyphs;
 pub use crate::glyphs::*;
 
-#[cfg(feature = "piston_window_texture")]
-use std::fmt;
-use std::{error, fs::File, ops, path::Path};
+use std::{error, fmt, fs::File, ops, path::Path};
 
 use bit_vec::BitVec;
 use graphics::{draw_state::DrawState, math::Matrix2d, types::Color, Graphics, ImageSize};
 use image::{DynamicImage, GenericImageView, ImageResult, Rgba, RgbaImage};
 #[cfg(feature = "piston_window_texture")]
-use piston_window::{
-    texture::{CreateTexture, Format},
-    G2dTexture, GfxFactory, TextureSettings,
-};
+use piston_window::{G2dTexture, G2dTextureContext};
 use png::{Decoder as PngDecoder, Limits};
 use rayon::prelude::*;
+use texture::{CreateTexture, Format, TextureSettings, UpdateTexture};
 
 /// The identity matrix: `[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]`.
 pub const IDENTITY: Matrix2d = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]];
 
 /// An Error type for `RenderBuffer`.
-#[cfg(feature = "piston_window_texture")]
 #[derive(Debug, Clone)]
 pub enum Error {
     /// Pixels/bytes mismatch when creating texture
-    ContainerTooSmall(usize, usize),
+    SizeMismatch(usize, usize),
 }
 
-#[cfg(feature = "piston_window_texture")]
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Error::ContainerTooSmall(len, area) => write!(
+            Error::SizeMismatch(len, area) => write!(
                 f,
                 "Container is too small for the given dimensions. \
                  \nContainer has {} bytes, which encode {} pixels, \
@@ -59,7 +53,6 @@ impl fmt::Display for Error {
     }
 }
 
-#[cfg(feature = "piston_window_texture")]
 impl error::Error for Error {}
 
 /// A buffer that can be rendered to with Piston's graphics library.
@@ -88,7 +81,7 @@ impl RenderBuffer {
             let (info, mut reader) = PngDecoder::new_with_limits(
                 File::open(&path)?,
                 Limits {
-                    pixels: std::u64::MAX,
+                    bytes: std::usize::MAX,
                 },
             )
             .read_info()?;
@@ -129,29 +122,61 @@ impl RenderBuffer {
     #[cfg(feature = "piston_window_texture")]
     pub fn to_g2d_texture(
         &self,
-        factory: &mut GfxFactory,
+        context: &mut G2dTextureContext,
         settings: &TextureSettings,
     ) -> Result<G2dTexture, Box<error::Error>> {
-        Ok(G2dTexture::from_image(factory, &self.inner, settings)?)
+        Ok(G2dTexture::from_image(context, &self.inner, settings)?)
     }
 }
 
-#[cfg(feature = "piston_window_texture")]
 impl CreateTexture<()> for RenderBuffer {
-    type Error = Box<error::Error>;
+    type Error = Error;
     fn create<S: Into<[u32; 2]>>(
         _factory: &mut (),
         _format: Format,
         memory: &[u8],
         size: S,
         _settings: &TextureSettings,
-    ) -> Result<Self, Box<error::Error>> {
+    ) -> Result<Self, Error> {
         let size = size.into();
         Ok(RenderBuffer::from(
-            RgbaImage::from_raw(size[0], size[1], memory.to_vec()).ok_or(
-                Error::ContainerTooSmall(memory.len(), (size[0] * size[1]) as usize),
-            )?,
+            RgbaImage::from_raw(size[0], size[1], memory.to_vec()).ok_or(Error::SizeMismatch(
+                memory.len(),
+                (size[0] * size[1]) as usize,
+            ))?,
         ))
+    }
+}
+
+impl UpdateTexture<()> for RenderBuffer {
+    type Error = Error;
+    fn update<O, S>(
+        &mut self,
+        _factory: &mut (),
+        _format: Format,
+        memory: &[u8],
+        offset: O,
+        size: S,
+    ) -> Result<(), Self::Error>
+    where
+        O: Into<[u32; 2]>,
+        S: Into<[u32; 2]>,
+    {
+        let offset = offset.into();
+        let size = size.into();
+        let new_image = RenderBuffer::from(
+            RgbaImage::from_raw(size[0], size[1], memory.to_vec()).ok_or(Error::SizeMismatch(
+                memory.len(),
+                (size[0] * size[1]) as usize,
+            ))?,
+        );
+        for i in 0..size[0] {
+            for j in 0..size[1] {
+                let color = new_image.pixel(i, j);
+                self.set_pixel(i + offset[0], j + offset[1], color);
+            }
+        }
+        Ok(())
     }
 }
 
@@ -327,22 +352,20 @@ impl Graphics for RenderBuffer {
 }
 
 fn color_f32_rgba(color: &[f32; 4]) -> Rgba<u8> {
-    Rgba {
-        data: [
-            (color[0] * 255.0) as u8,
-            (color[1] * 255.0) as u8,
-            (color[2] * 255.0) as u8,
-            (color[3] * 255.0) as u8,
-        ],
-    }
+    Rgba([
+        (color[0] * 255.0) as u8,
+        (color[1] * 255.0) as u8,
+        (color[2] * 255.0) as u8,
+        (color[3] * 255.0) as u8,
+    ])
 }
 
 fn color_rgba_f32(color: Rgba<u8>) -> [f32; 4] {
     [
-        f32::from(color.data[0]) / 255.0,
-        f32::from(color.data[1]) / 255.0,
-        f32::from(color.data[2]) / 255.0,
-        f32::from(color.data[3]) / 255.0,
+        f32::from(color[0]) / 255.0,
+        f32::from(color[1]) / 255.0,
+        f32::from(color[2]) / 255.0,
+        f32::from(color[3]) / 255.0,
     ]
 }
 
