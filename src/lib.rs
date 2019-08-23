@@ -10,7 +10,8 @@ There is also an optional feature for `RenderBuffer` that allows it to be
 converted into a `G2dTexture` so that it can be rendered with
 [`piston_window`](https://github.com/PistonDevelopers/piston_window). To
 enable this, add `features = ["piston_window_texture"]` to the `graphics_buffer`
-dependency in your `cargo.toml`.
+dependency in your `cargo.toml`. More about this feature can be found in
+the [`RenderBuffer` documentation](struct.RenderBuffer.html).
 */
 
 mod glyphs;
@@ -55,7 +56,19 @@ impl fmt::Display for Error {
 
 impl error::Error for Error {}
 
-/// A buffer that can be rendered to with Piston's graphics library.
+/**
+A buffer that can be rendered to with Piston's graphics library.
+
+Enabling the `piston_window_texture` feature exposes a function called
+`to_g2d_texture`, with the following signature:
+```ignore
+pub fn to_g2d_texture(
+    &self,
+    context: &mut G2dTextureContext,
+    settings: &TextureSettings,
+) -> Result<G2dTexture, Box<dyn std::error::Error>>;
+```
+*/
 #[derive(Debug, Clone)]
 pub struct RenderBuffer {
     inner: RgbaImage,
@@ -124,7 +137,7 @@ impl RenderBuffer {
         &self,
         context: &mut G2dTextureContext,
         settings: &TextureSettings,
-    ) -> Result<G2dTexture, Box<error::Error>> {
+    ) -> Result<G2dTexture, Box<dyn error::Error>> {
         Ok(G2dTexture::from_image(context, &self.inner, settings)?)
     }
 }
@@ -314,7 +327,7 @@ impl Graphics for RenderBuffer {
                 let used = &self.used;
                 (tl[0]..br[0]).into_par_iter().for_each(|x| {
                     let mut entered = false;
-                    let range: Box<Iterator<Item = i32>> = if vertical_balance_top {
+                    let range: Box<dyn Iterator<Item = i32>> = if vertical_balance_top {
                         Box::new(tl[1]..br[1])
                     } else {
                         Box::new((tl[1]..br[1]).rev())
