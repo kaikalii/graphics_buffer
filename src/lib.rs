@@ -26,7 +26,7 @@ use image::{DynamicImage, GenericImageView, ImageResult, Rgba, RgbaImage};
 use piston_window::{G2dTexture, G2dTextureContext};
 use png::{Decoder as PngDecoder, Limits};
 use rayon::prelude::*;
-use texture::{CreateTexture, Format, TextureSettings, UpdateTexture};
+use texture::{CreateTexture, Format, TextureOp, TextureSettings, UpdateTexture};
 
 /// The identity matrix: `[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]`.
 pub const IDENTITY: Matrix2d = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]];
@@ -142,8 +142,11 @@ impl RenderBuffer {
     }
 }
 
-impl CreateTexture<()> for RenderBuffer {
+impl TextureOp<()> for RenderBuffer {
     type Error = Error;
+}
+
+impl CreateTexture<()> for RenderBuffer {
     fn create<S: Into<[u32; 2]>>(
         _factory: &mut (),
         _format: Format,
@@ -153,16 +156,13 @@ impl CreateTexture<()> for RenderBuffer {
     ) -> Result<Self, Error> {
         let size = size.into();
         Ok(RenderBuffer::from(
-            RgbaImage::from_raw(size[0], size[1], memory.to_vec()).ok_or(Error::SizeMismatch(
-                memory.len(),
-                (size[0] * size[1]) as usize,
-            ))?,
+            RgbaImage::from_raw(size[0], size[1], memory.to_vec())
+                .ok_or_else(|| Error::SizeMismatch(memory.len(), (size[0] * size[1]) as usize))?,
         ))
     }
 }
 
 impl UpdateTexture<()> for RenderBuffer {
-    type Error = Error;
     fn update<O, S>(
         &mut self,
         _factory: &mut (),
@@ -178,10 +178,8 @@ impl UpdateTexture<()> for RenderBuffer {
         let offset = offset.into();
         let size = size.into();
         let new_image = RenderBuffer::from(
-            RgbaImage::from_raw(size[0], size[1], memory.to_vec()).ok_or(Error::SizeMismatch(
-                memory.len(),
-                (size[0] * size[1]) as usize,
-            ))?,
+            RgbaImage::from_raw(size[0], size[1], memory.to_vec())
+                .ok_or_else(|| Error::SizeMismatch(memory.len(), (size[0] * size[1]) as usize))?,
         );
         for i in 0..size[0] {
             for j in 0..size[1] {
@@ -408,6 +406,7 @@ fn triangle_contains(tri: &[[f32; 2]], point: [f32; 2]) -> bool {
     b1 == b2 && b2 == b3
 }
 
+#[allow(clippy::many_single_char_names)]
 fn map_to_triangle(point: [f32; 2], from_tri: &[[f32; 2]], to_tri: &[[f32; 2]]) -> [f32; 2] {
     let t = from_tri;
     let p = point;

@@ -12,7 +12,7 @@ use crate::RenderBuffer;
 pub type BufferGlyphs<'a> = rusttype::GlyphCache<'a, (), RenderBuffer>;
 
 /// Create a `BufferGlyphs` from some font data
-pub fn buffer_glyphs_from_bytes<'a>(font_data: &'a [u8]) -> Result<BufferGlyphs<'a>, ()> {
+pub fn buffer_glyphs_from_bytes(font_data: &[u8]) -> Result<BufferGlyphs, ()> {
     BufferGlyphs::from_bytes(font_data, (), TextureSettings::new())
 }
 /// Create a `BufferGlyphs` from a path to some font
