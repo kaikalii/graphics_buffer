@@ -13,18 +13,18 @@ required-features = ['piston_window_texture']
 
 [dependencies]
 bit-vec = '0.6.2'
-image = '0.23.8'
+image = '0.23.10'
 piston-texture = '0.8.0'
 png = '0.16.7'
-rayon = '1.3.1'
+rayon = '1.4.1'
 
 [dependencies.piston2d-graphics]
 features = ['glyph_cache_rusttype']
-version = '0.36.0'
+version = '0.37.0'
 
 [dependencies.piston_window]
 optional = true
-version = '0.111.0'
+version = '0.113.0'
 
 [features]
 default = []
@@ -42,3 +42,6 @@ name = 'graphics_buffer'
 readme = 'readme.md'
 repository = 'https://github.com/kaikalii/graphics_buffer'
 version = '0.7.4'
+
+[package.metadata.docs.rs]
+features = ['piston_window_texture']

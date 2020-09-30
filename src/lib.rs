@@ -58,16 +58,6 @@ impl error::Error for Error {}
 
 /**
 A buffer that can be rendered to with Piston's graphics library.
-
-Enabling the `piston_window_texture` feature exposes a function called
-`to_g2d_texture`, with the following signature:
-```ignore
-pub fn to_g2d_texture(
-    &self,
-    context: &mut G2dTextureContext,
-    settings: &TextureSettings,
-) -> Result<G2dTexture, Box<dyn std::error::Error>>;
-```
 */
 #[derive(Debug, Clone)]
 pub struct RenderBuffer {
