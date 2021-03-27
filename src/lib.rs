@@ -350,6 +350,20 @@ impl Graphics for RenderBuffer {
             }
         });
     }
+
+    fn tri_list_c<F>(&mut self, _: &DrawState, _: F)
+    where
+        F: FnMut(&mut dyn FnMut(&[[f32; 2]], &[[f32; 4]])),
+    {
+        unimplemented!("<RenderBuffer as Graphics>::tri_list_c is currently unimplemented")
+    }
+
+    fn tri_list_uv_c<F>(&mut self, _: &DrawState, _: &Self::Texture, _: F)
+    where
+        F: FnMut(&mut dyn FnMut(&[[f32; 2]], &[[f32; 2]], &[[f32; 4]])),
+    {
+        unimplemented!("<RenderBuffer as Graphics>::tri_list_uv_c is currently unimplemented")
+    }
 }
 
 fn color_f32_rgba(color: &[f32; 4]) -> Rgba<u8> {
