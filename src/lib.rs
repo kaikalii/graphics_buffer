@@ -59,7 +59,7 @@ impl error::Error for Error {}
 /**
 A buffer that can be rendered to with Piston's graphics library.
 */
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct RenderBuffer {
     inner: RgbaImage,
     used: Vec<BitVec>,
