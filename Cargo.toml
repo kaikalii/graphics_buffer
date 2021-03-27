@@ -33,23 +33,23 @@ piston_window_texture = ['piston_window']
 [package]
 authors = ['Kai Schmidt <kaikaliischmidt@gmail.com>']
 categories = [
-    'multimedia',
-    'multimedia::images',
-    'rendering',
+  'multimedia',
+  'multimedia::images',
+  'rendering',
 ]
 description = '''A buffer which can be used as a render target for Piston's graphics library. This buffer can be loaded from and/or saved to a file on disk. This allows for things like screenshots in games.'''
 documentation = 'https://docs.rs/graphics_buffer/'
 edition = '2018'
 keywords = [
-    'piston',
-    'image',
-    'rendering',
-    'graphics',
+  'piston',
+  'image',
+  'rendering',
+  'graphics',
 ]
 license = 'MIT'
 name = 'graphics_buffer'
 readme = 'readme.md'
 repository = 'https://github.com/kaikalii/graphics_buffer'
-version = '0.7.5'
+version = '0.7.6'
 [package.metadata.docs.rs]
 features = ['piston_window_texture']
