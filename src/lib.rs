@@ -59,7 +59,7 @@ impl error::Error for Error {}
 /**
 A buffer that can be rendered to with Piston's graphics library.
 */
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct RenderBuffer {
     inner: RgbaImage,
     used: Vec<BitVec>,
@@ -195,7 +195,7 @@ impl From<DynamicImage> for RenderBuffer {
     fn from(image: DynamicImage) -> Self {
         let (width, height) = image.dimensions();
         RenderBuffer {
-            inner: image.to_rgba(),
+            inner: image.to_rgba8(),
             used: vec![BitVec::from_elem(height as usize, false); width as usize],
         }
     }
