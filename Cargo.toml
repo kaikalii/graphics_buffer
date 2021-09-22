@@ -20,11 +20,11 @@ rayon = '1.5.0'
 
 [dependencies.piston2d-graphics]
 features = ['glyph_cache_rusttype']
-version = '0.39.0'
+version = '0.40.0'
 
 [dependencies.piston_window]
 optional = true
-version = '0.118.0'
+version = '0.120.0'
 
 [features]
 default = []
@@ -50,6 +50,6 @@ license = 'MIT'
 name = 'graphics_buffer'
 readme = 'readme.md'
 repository = 'https://github.com/kaikalii/graphics_buffer'
-version = '0.7.6'
+version = '0.7.7'
 [package.metadata.docs.rs]
 features = ['piston_window_texture']
